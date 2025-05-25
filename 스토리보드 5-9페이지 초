@@ -1,0 +1,84 @@
+class Tab {
+  constructor(name, subTabNames = [], optionCount = 3) {
+    this.name = name;
+    this.subTabNames = subTabNames;
+    this.optionCount = optionCount;
+    this.selectedOption = null;
+    this.currentSubTab = 0;
+  }
+
+  drawSubTabs() {
+    for (let i = 0; i < this.subTabNames.length; i++) {
+      fill(i === this.currentSubTab ? '#bbb' : '#eee');
+      rect(600 + i * 50, 50, 50, 30);
+      fill(0);
+      textAlign(CENTER, CENTER);
+      text(this.subTabNames[i], 600 + i * 50 + 25, 65);
+    }
+  }
+
+  drawSelector() {
+    rect(400, 100, 380, 400);
+    for (let i = 0; i < this.optionCount; i++) {
+      fill(200);
+      rect(450, 150 + i * 100, 280, 60);
+      fill(0);
+      textAlign(CENTER, CENTER);
+      text(`옵션 ${i + 1}`, 450 + 140, 150 + i * 100 + 30);
+    }
+  }
+
+  drawPreview() {
+    fill(220);
+    rect(50, 100, 300, 400);
+    fill(0);
+    textAlign(CENTER, CENTER);
+    if (this.selectedOption !== null) {
+      text(`선택됨: 옵션 ${this.selectedOption + 1}`, 200, 300);
+    } else {
+      text(`아직 선택 없음`, 200, 300);
+    }
+  }
+
+  handleClick(mx, my) {
+    // 서브탭 클릭
+    for (let i = 0; i < this.subTabNames.length; i++) {
+      if (mx > 600 + i * 50 && mx < 650 + i * 50 && my > 50 && my < 80) {
+        this.currentSubTab = i;
+        return true;
+      }
+    }
+
+    // 옵션 클릭
+    for (let i = 0; i < this.optionCount; i++) {
+      if (mx > 450 && mx < 730 && my > 150 + i * 100 && my < 210 + i * 100) {
+        this.selectedOption = i;
+        return true;
+      }
+    }
+
+    return false;
+  }
+}
+let tabs = [];
+let currentTabIndex = 0;
+
+function setup() {
+  createCanvas(800, 600);
+
+  tabs.push(new Tab('장례식장 꾸미기', ['화환 단수', '꽃', '문구']));
+  tabs.push(new Tab('화환 꾸미기', ['영정사진', '조명', '향', '꽃', '벽지', '바닥']));
+  tabs.push(new Tab('장례식 식사 큐레이팅'));
+  tabs.push(new Tab('장례식 초대장 작성'));
+}
+function draw() {
+  background(240);
+  drawTopTabs();
+
+  const currentTab = tabs[currentTabIndex];
+  if (currentTab.subTabNames.length > 0) {
+    currentTab.drawSubTabs();
+  }
+  currentTab.drawSelector();
+  currentTab.drawPreview();
+}
