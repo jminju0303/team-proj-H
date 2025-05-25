@@ -1,12 +1,44 @@
+const API_KEY = 'AIzaSyB4wt_ipKnkLEAC5g2MTQSp5yzt7oI3kU8';
+
 let currentScreen = 1;
 let showPopup = false;
 let inputField;
+
+let searchInput, searchButton, playButton;
+let searchResults = [];
+let playlist = [];
+let player;
+let currentPlayingIndex = 0;
+let playerReady = false;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   textAlign(CENTER, CENTER);
   rectMode(CENTER);
   noStroke();
+
+  // 검색창 및 버튼 (screen4 용)
+  searchInput = createInput();
+  searchInput.position(400, 60);
+  searchInput.size(500);
+  searchInput.hide();
+
+  searchButton = createButton('검색');
+  searchButton.position(910, 60);
+  searchButton.mousePressed(() => {
+    let query = searchInput.value();
+    if (query) searchYouTube(query);
+  });
+  searchButton.hide();
+
+  playButton = createButton('▶️ 재생');
+  playButton.position(50, height - 80);
+  playButton.mousePressed(playPlaylist);
+  playButton.hide();
+
+  let playerDiv = createDiv();
+  playerDiv.id('player');
+  playerDiv.position(-9999, -9999);
 }
 
 function draw() {
@@ -17,6 +49,8 @@ function draw() {
     drawScreen2();
   } else if (currentScreen === 3) {
     drawScreen3();
+  } else if (currentScreen === 4) {
+    drawScreen4();
   } else if (currentScreen === 10) {
     drawScreen10();
   }
@@ -146,6 +180,48 @@ function drawScreen3() {
   }
 }
 
+function drawScreen4() {
+  // 검색창, 버튼 보이기
+  searchInput.show();
+  searchButton.show();
+  playButton.show();
+
+  background(245);
+
+  // 좌측: 나의 장례식 플레이리스트
+  fill(30);
+  textSize(18);
+  textAlign(LEFT, CENTER);
+  text("나의 장례식 플레이리스트", 50, 30);
+  for (let i = 0; i < playlist.length; i++) {
+    fill(255);
+    rect(50, 60 + i * 80, 300, 70, 10);
+    if (playlist[i].thumbnailImg) {
+      image(playlist[i].thumbnailImg, 60, 65 + i * 80, 60, 60);
+    }
+    fill(0);
+    text(playlist[i].title, 130, 80 + i * 80);
+    text(playlist[i].artist, 130, 100 + i * 80);
+  }
+
+  // 우측: 검색 결과
+  fill(20);
+  textSize(18);
+  text("검색 결과", 400, 100);
+  for (let i = 0; i < searchResults.length; i++) {
+    let x = 400;
+    let y = 130 + i * 80;
+    fill(255);
+    rect(x, y, 600, 70, 10);
+    if (searchResults[i].thumbnailImg) {
+      image(searchResults[i].thumbnailImg, x + 10, y + 5, 60, 60);
+    }
+    fill(0);
+    text(searchResults[i].title, x + 80, y + 25);
+    text(searchResults[i].artist, x + 80, y + 45);
+  }
+}
+
 //초대장 작성 화면 (drawScreen10으로 임시 설정)
 function drawScreen10() {
   background(238);
@@ -223,7 +299,6 @@ function drawScreen10() {
   }
 }
 
-//마우스 누르면 다음 화면으로 이동
 function mousePressed() {
   if (currentScreen === 1) {
     let bx = width / 2;
@@ -240,38 +315,110 @@ function mousePressed() {
       currentScreen = 3;
     }
   } else if (currentScreen === 3) {
-    let x = width * 0.7;
-    let y = height * 0.6;
+    let playlistX = width * 0.2;
+    let playlistY = height * 0.45;
     let w = 180;
     let h = 45;
-    if (mouseX > x - w / 2 && mouseX < x + w / 2 && mouseY > y - h / 2 && mouseY < y + h / 2) {
+    if (mouseX > playlistX - w / 2 && mouseX < playlistX + w / 2 && mouseY > playlistY - h / 2 && mouseY < playlistY + h / 2) {
+      currentScreen = 4;
+    }
+
+    let inviteX = width * 0.7;
+    let inviteY = height * 0.6;
+    if (mouseX > inviteX - w / 2 && mouseX < inviteX + w / 2 && mouseY > inviteY - h / 2 && mouseY < inviteY + h / 2) {
       currentScreen = 10;
     }
+  } else if (currentScreen === 4) {
+    for (let i = 0; i < searchResults.length; i++) {
+      let x = 400;
+      let y = 130 + i * 80;
+      if (mouseX > x && mouseX < x + 600 && mouseY > y && mouseY < y + 70) {
+        playlist.push(searchResults[i]);
+      }
+    }
   } else if (currentScreen === 10) {
-  let bx = 80;
-  let by = 130;
-  let bw = 40;
-  let bh = 40;
-  if (mouseX > bx - bw / 2 && mouseX < bx + bw / 2 &&
-      mouseY > by - bh / 2 && mouseY < by + bh / 2) {
-    if (!showPopup) {
-      showPopup = true;
-
-      let popupW = 260;
-      let popupH = 320;
-      let x = width / 2 + 150;
-      let y = height / 2;
-
-      inputField = createInput();
-      inputField.position(x - popupW / 2 + 20, y - popupH / 2 + 55);
-      inputField.size(popupW - 40, 24);
-      inputField.style('font-size', '14px');
+    let bx = 80;
+    let by = 130;
+    let bw = 40;
+    let bh = 40;
+    if (mouseX > bx - bw / 2 && mouseX < bx + bw / 2 && mouseY > by - bh / 2 && mouseY < by + bh / 2) {
+      if (!showPopup) {
+        showPopup = true;
+        let popupW = 260;
+        let popupH = 320;
+        let x = width / 2 + 150;
+        let y = height / 2;
+        inputField = createInput();
+        inputField.position(x - popupW / 2 + 20, y - popupH / 2 + 55);
+        inputField.size(popupW - 40, 24);
+        inputField.style('font-size', '14px');
       }
     }
   }
 }
 
-//초대장 팝업에서 esc 누르면 해제
+function searchYouTube(query) {
+  let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&q=${query}&key=${API_KEY}`;
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      searchResults = data.items.map(item => {
+        let song = {
+          title: item.snippet.title,
+          artist: item.snippet.channelTitle,
+          thumbnail: item.snippet.thumbnails.default.url,
+          videoId: item.id.videoId
+        };
+        loadImage(song.thumbnail, img => {
+          song.thumbnailImg = img;
+        });
+        return song;
+      });
+    });
+}
+
+function onYouTubeIframeAPIReady() {
+  
+  player = new YT.Player('player', {
+    height: '200',
+    width: '400',
+    videoId: '',
+    events: {
+      'onReady': onPlayerReady,
+      'onStateChange': onPlayerStateChange
+    }
+  });
+}
+
+function onPlayerReady(event) {
+  playerReady = true;
+  console.log("YouTube Player 준비 완료");
+}
+
+function onPlayerStateChange(event) {
+  if (event.data === YT.PlayerState.ENDED) {
+    currentPlayingIndex++;
+    if (currentPlayingIndex < playlist.length) {
+      player.loadVideoById(playlist[currentPlayingIndex].videoId);
+      player.playVideo();
+    }
+  }
+}
+
+function playPlaylist() {
+  console.log("▶️ playerReady:", playerReady);
+  console.log("▶️ playlist.length:", playlist.length);
+
+  if (playerReady && playlist.length > 0) {
+    currentPlayingIndex = 0;
+    player.loadVideoById(playlist[0].videoId);
+    player.playVideo();
+  } else {
+    console.warn("Player가 아직 준비되지 않았거나 플레이리스트가 비어 있습니다.");
+  }
+}
+
+
 function keyPressed() {
   if (keyCode === ESCAPE && showPopup) {
     showPopup = false;
