@@ -33,7 +33,8 @@ function setup() {
 
   playButton = createButton('▶️ 재생');
   playButton.position(50, height - 80);
-  playButton.mousePressed(playPlaylist);
+  playButton.mousePressed
+  (playPlaylist);
   playButton.hide();
 
   let playerDiv = createDiv();
@@ -53,6 +54,16 @@ function draw() {
     drawScreen4();
   } else if (currentScreen === 10) {
     drawScreen10();
+  }
+
+  if (currentScreen === 4) {
+    searchInput.show();
+    searchButton.show();
+    playButton.show();
+  } else {
+    searchInput.hide();
+    searchButton.hide();
+    playButton.hide();
   }
 }
 
@@ -181,36 +192,76 @@ function drawScreen3() {
 }
 
 function drawScreen4() {
-  // 검색창, 버튼 보이기
-  searchInput.show();
-  searchButton.show();
-  playButton.show();
-
   background(245);
+
+  // 상단 탭 UI
+  fill(255);
+  stroke(180);
+  rect(width / 2, 60, width * 0.95, 30, 5);
+
+  // 좌측 상단 동그라미
+  fill(255, 90, 90); circle(35, 60, 12);
+  fill(255, 220, 80); circle(55, 60, 12);
+  fill(70, 200, 100); circle(75, 60, 12);
+
+  // 탭 위치 정의
+  let tabY = 60;
+  let tabH = 30;
+  let mailX = width * 0.22;
+  let siteX = width * 0.42;
+  let inviteX = width * 0.55;
+
+  // 메일 탭 (비활성)
+  fill(255);
+  stroke(180);
+  rect(mailX, tabY, 120, tabH, 5, 5, 0, 0);
+  fill(100);
+  noStroke();
+  textAlign(CENTER, CENTER);
+  textSize(14);
+  text("메일", mailX, tabY);
+
+  // 웹사이트 이름 탭 (활성)
+  fill(230);
+  stroke(180);
+  rect(siteX, tabY, 160, tabH, 5, 5, 0, 0);
+  fill(100);
+  noStroke();
+  text("플레이리스트 선곡", siteX, tabY);
+
+  // 초대장 작성 탭 (hover 및 클릭 대응)
+  let isHoverInvite = mouseX > inviteX - 90 && mouseX < inviteX + 90 && mouseY > tabY - tabH / 2 && mouseY < tabY + tabH / 2;
+
+  fill(isHoverInvite ? 230 : 255);
+  stroke(180);
+  rect(inviteX, tabY, 180, tabH, 5, 5, 0, 0);
+  fill(100);
+  noStroke();
+  text("초대장 작성", inviteX, tabY);
 
   // 좌측: 나의 장례식 플레이리스트
   fill(30);
   textSize(18);
   textAlign(LEFT, CENTER);
-  text("나의 장례식 플레이리스트", 50, 30);
+  text("나의 장례식 플레이리스트", 50, 120);
   for (let i = 0; i < playlist.length; i++) {
     fill(255);
-    rect(50, 60 + i * 80, 300, 70, 10);
+    rect(50, 150 + i * 80, 300, 70, 10);
     if (playlist[i].thumbnailImg) {
-      image(playlist[i].thumbnailImg, 60, 65 + i * 80, 60, 60);
+      image(playlist[i].thumbnailImg, 60, 155 + i * 80, 60, 60);
     }
     fill(0);
-    text(playlist[i].title, 130, 80 + i * 80);
-    text(playlist[i].artist, 130, 100 + i * 80);
+    text(playlist[i].title, 130, 170 + i * 80);
+    text(playlist[i].artist, 130, 190 + i * 80);
   }
 
   // 우측: 검색 결과
   fill(20);
   textSize(18);
-  text("검색 결과", 400, 100);
+  text("검색 결과", 400, 140);
   for (let i = 0; i < searchResults.length; i++) {
     let x = 400;
-    let y = 130 + i * 80;
+    let y = 170 + i * 80;
     fill(255);
     rect(x, y, 600, 70, 10);
     if (searchResults[i].thumbnailImg) {
@@ -222,15 +273,52 @@ function drawScreen4() {
   }
 }
 
+
 //초대장 작성 화면 (drawScreen10으로 임시 설정)
 function drawScreen10() {
   background(238);
+
+  // 상단 탭 UI
   fill(255);
   stroke(180);
-  rect(width / 2, 60, width * 0.95, 30, 3);
+  rect(width / 2, 60, width * 0.95, 30, 5);
   fill(255, 90, 90); circle(35, 60, 12);
   fill(255, 220, 80); circle(55, 60, 12);
   fill(70, 200, 100); circle(75, 60, 12);
+
+  // 탭 위치 정의
+  let tabY = 60;
+  let tabH = 30;
+  let mailX = width * 0.22;
+  let siteX = width * 0.42;
+  let inviteX = width * 0.55;
+
+  // 메일 탭 (비활성)
+  fill(255);
+  stroke(180);
+  rect(mailX, tabY, 120, tabH, 5, 5, 0, 0);
+  fill(100);
+  noStroke();
+  textAlign(CENTER, CENTER);
+  textSize(14);
+  text("메일", mailX, tabY);
+
+  // 플레이리스트 탭 (비활성)
+  let isHoverSite = mouseX > siteX - 80 && mouseX < siteX + 80 && mouseY > tabY - tabH / 2 && mouseY < tabY + tabH / 2;
+  fill(isHoverSite ? 230 : 255);
+  stroke(180);
+  rect(siteX, tabY, 160, tabH, 5, 5, 0, 0);
+  fill(100);
+  noStroke();
+  text("플레이리스트 선곡", siteX, tabY);
+
+  // 초대장 탭 (활성)
+  fill(230);
+  stroke(180);
+  rect(inviteX, tabY, 180, tabH, 5, 5, 0, 0);
+  fill(100);
+  noStroke();
+  text("초대장 작성", inviteX, tabY);
 
   //초대장 만들기 버튼
   let bx = 80;
@@ -300,6 +388,32 @@ function drawScreen10() {
 }
 
 function mousePressed() {
+  //상단 탭: 초대장 작성 클릭 처리 (모든 화면 공통)
+  let tabY = 60;
+  let tabH = 30;
+  let inviteX = width * 0.55;
+  let siteX = width * 0.42;
+
+  if (
+    mouseX > siteX - 80 &&
+    mouseX < siteX + 80 &&
+    mouseY > tabY - tabH / 2 &&
+    mouseY < tabY + tabH / 2
+  ) {
+    currentScreen = 4;
+    return;
+  }
+
+  if (
+    mouseX > inviteX - 90 &&
+    mouseX < inviteX + 90 &&
+    mouseY > tabY - tabH / 2 &&
+    mouseY < tabY + tabH / 2
+  ) {
+    currentScreen = 10;
+    return;
+  }
+
   if (currentScreen === 1) {
     let bx = width / 2;
     let by = height / 2;
@@ -356,6 +470,7 @@ function mousePressed() {
     }
   }
 }
+
 
 function searchYouTube(query) {
   let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&q=${query}&key=${API_KEY}`;
