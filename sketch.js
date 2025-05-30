@@ -11,6 +11,32 @@ let player;
 let currentPlayingIndex = 0;
 let playerReady = false;
 
+//폰트
+let fontHead1;
+let fontHead2;
+let fontHead3;
+let fontHead4;
+
+//이미지에셋
+let envelopeImg;
+
+//screen1 편지 버튼
+let screen1ScaleFactor = 1.0;  // 현재 스케일
+let screen1TargetScale = 1.0;  // 목표 스케일
+
+//screen1 텍스트
+let screen1Text = "저승사자 님으로부터 메일이 도착하였습니다.";
+let screen1CurrentIndex = 0;
+let screen1TypingSpeed = 5; // 프레임 단위로 글자 등장 속도 조절 (낮을수록 빠름)
+
+function preload() {
+  envelopeImg = loadImage("envelope.png");
+  fontHead1 = loadFont("fonts/IropkeBatangM.woff");
+  fontHead2 = loadFont("fonts/NotoSansKR-ExtraBold.ttf");
+  fontHead3 = loadFont("fonts/NotoSansKR-Bold.ttf");
+  fontHead4 = loadFont("fonts/NotoSansKR-Regular.ttf");
+}
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   textAlign(CENTER, CENTER);
@@ -43,7 +69,7 @@ function setup() {
 }
 
 function draw() {
-  background(255);
+  background(127, 127, 127);
   if (currentScreen === 1) {
     drawScreen1();
   } else if (currentScreen === 2) {
@@ -69,22 +95,150 @@ function draw() {
 
 //시작화면
 function drawScreen1() {
-  //편지봉투 버튼
-  fill(230);
-  noStroke();
   let bx = width / 2;
   let by = height / 2;
-  fill(245);
-  rect(bx, by, 100, 70);
-  fill(180);
-  triangle(bx - 50, by - 35, bx + 50, by - 35, bx, by + 10);
-  if (mouseX > bx - 50 && mouseX < bx + 50 && mouseY > by - 35 && mouseY < by + 35) {
-    fill(0, 0, 0, 20);
-    rect(bx, by, 100, 70);
-  }
-  fill(80);
+  let imgWidth = 100;
+  let imgHeight = 100;
+
+  imageMode(CENTER);
+  image(envelopeImg, bx, by, imgWidth, imgHeight);
+
+  // 마우스 오버 효과
+  // 마우스 오버 체크
+  let isHovering = mouseX > bx - imgWidth / 2 && mouseX < bx + imgWidth / 2 &&
+                   mouseY > by - imgHeight / 2 && mouseY < by + imgHeight / 2;
+
+  // 목표 스케일 설정
+  screen1TargetScale = isHovering ? 1.7 : 1.3;
+
+  // 현재 스케일을 부드럽게 보간 (lerp = linear interpolation)
+  screen1ScaleFactor = lerp(screen1ScaleFactor, screen1TargetScale, 0.1);
+
+  // 이미지 그리기 (scale 적용)
+  imageMode(CENTER);
+  push(); // 변환 상태 저장
+  translate(bx, by);
+  scale(screen1ScaleFactor);
+  image(envelopeImg, 0, 0, imgWidth, imgHeight);
+  pop(); // 변환 상태 복구
+
+    // 🔴 알림 배지 위치 계산 (우측 상단)
+  let badgeOffsetX = imgWidth / 2 * screen1ScaleFactor;
+  let badgeOffsetY = imgHeight / 2 * screen1ScaleFactor;
+  let badgeX = bx + badgeOffsetX - 10;
+  let badgeY = by - badgeOffsetY + 35;
+  let badgeSize = 30;
+
+  // 🔴 그림자 설정
+  drawingContext.shadowBlur = 8;
+  drawingContext.shadowColor = 'rgba(0, 0, 0, 0.3)';
+  drawingContext.shadowOffsetX = 0;
+  drawingContext.shadowOffsetY = 0;
+
+  // 🔴 빨간색 원 그리기
+  fill(255, 70, 70);
+  noStroke();
+  ellipse(badgeX, badgeY, badgeSize, badgeSize);
+
+  // 그림자 초기화
+  drawingContext.shadowBlur = 0;
+  drawingContext.shadowOffsetX = 0;
+  drawingContext.shadowOffsetY = 0;
+
+  // 숫자 텍스트 (예: "1")
+  fill(255);
+  textSize(12);
+  textAlign(CENTER, CENTER);
+  textFont(fontHead4);
+  text("1", badgeX, badgeY - 4);
+
+  let textStr = screen1Text.substring(0, screen1CurrentIndex);
+  // 텍스트 너비 구하기 + padding 설정
+  let paddingX = 40;
+  let paddingY = 30;
+  textFont(fontHead4);  // ⚠️ textWidth() 바로 전에 명시!
   textSize(18);
-  text("저승사자 님으로부터 메일이 도착하였습니다.", width / 2, height / 2 + 100);
+  let tw = textWidth(textStr);
+  let th = 18; // textSize랑 동일하게 세팅 (글자 크기)
+
+  // 말풍선 위치 (텍스트 바로 아래)
+  let bubbleX = width / 2;
+  let bubbleY = height / 2 + 100 + th / 2 + paddingY / 2;
+
+  // 말풍선 너비, 높이
+  let bubbleW = tw + paddingX * 2;
+  let bubbleH = th + paddingY;
+
+  // 말풍선 그리기
+  drawSpeechBubble(bubbleX, bubbleY, bubbleW, bubbleH, 12);
+  
+  // 흐림-선명 효과를 위한 alpha 값 계산 (0~1을 왕복)
+  let alphaValue = map(sin(frameCount * 0.05), -1, 1, 0.4, 1); // 0.4 ~ 1 사이 변동
+
+  // 말풍선 그리기 전에 globalAlpha 세팅
+  drawingContext.save(); // 상태 저장
+  drawingContext.globalAlpha = alphaValue;
+  drawSpeechBubble(bubbleX, bubbleY, bubbleW, bubbleH, 12);
+  drawingContext.restore(); // 원상복구
+
+  // 텍스트도 같은 alpha로 그리기
+  drawingContext.save();
+  drawingContext.globalAlpha = alphaValue;
+  //텍스트
+  fill(80);
+  noStroke();
+  textSize(18);
+  textAlign(CENTER);
+  textFont(fontHead4);
+
+  if (frameCount % screen1TypingSpeed === 0 && screen1CurrentIndex < screen1Text.length) {
+    screen1CurrentIndex++;
+  }
+
+  let displayedText = screen1Text.substring(0, screen1CurrentIndex);
+  text(displayedText, bubbleX, bubbleY - 5);
+  drawingContext.restore();
+}
+
+function drawSpeechBubble(x, y, w, h, r) {
+  // 그림자 설정
+  drawingContext.shadowBlur = 16;
+  drawingContext.shadowColor = 'rgba(0, 0, 0, 0.2)';
+  drawingContext.shadowOffsetX = 0;
+  drawingContext.shadowOffsetY = 0;
+
+  // r: 모서리 반경(radius)
+  fill(238);  // 말풍선 색
+  stroke(167, 141, 111);
+  strokeWeight(2);
+
+  beginShape();
+
+  // ⬆ 둥근 사각형 경로 (상단부터 시계 방향)
+  vertex(x - w / 2 + r, y - h / 2);
+  bezierVertex(x - w / 2, y - h / 2, x - w / 2, y - h / 2, x - w / 2, y - h / 2 + r);
+  vertex(x - w / 2, y + h / 2 - r);
+
+  bezierVertex(x - w / 2, y + h / 2, x - w / 2, y + h / 2, x - w / 2 + r, y + h / 2);
+  
+  // ⬇ 꼬리 붙이는 지점 (아래 중앙)
+  vertex(x - 10, y + h / 2);
+  vertex(x,     y + h / 2 + 15);  // 꼬리 끝
+  vertex(x + 10, y + h / 2);
+
+  // ⬇ 둥근 사각형 계속 이어서
+  vertex(x + w / 2 - r, y + h / 2);
+  bezierVertex(x + w / 2, y + h / 2, x + w / 2, y + h / 2, x + w / 2, y + h / 2 - r);
+  vertex(x + w / 2, y - h / 2 + r);
+  bezierVertex(x + w / 2, y - h / 2, x + w / 2, y - h / 2, x + w / 2 - r, y - h / 2);
+  vertex(x - w / 2 + r, y - h / 2);
+
+  endShape(CLOSE);
+
+  // 그림자 초기화 (다음 도형에 영향 X)
+  drawingContext.shadowBlur = 0;
+  drawingContext.shadowOffsetX = 0;
+  drawingContext.shadowOffsetY = 0;
 }
 
 //메일함 화면
