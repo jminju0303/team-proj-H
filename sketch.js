@@ -1,30 +1,12 @@
-const API_KEY = 'AIzaSyB4wt_ipKnkLEAC5g2MTQSp5yzt7oI3kU8';
-
 let currentScreen = 1;
-let showPopup = false;
-let inputField;
 
-// Screen 1 variables
-let envelopeImg;
-let screen1ScaleFactor = 1.0;
-let screen1TargetScale = 1.0;
-let screen1Text = "저승사자 님으로부터 메일이 도착하였습니다.";
-let screen1CurrentIndex = 0;
-let screen1TypingSpeed = 5;
-
-// Screen 4 variables
-let searchInput, searchButton, playButton;
-let searchResults = [];
-let playlist = [];
-let player;
-let currentPlayingIndex = 0;
-let playerReady = false;
-
-// Fonts
-let fontHead1, fontHead2, fontHead3, fontHead4;
-
-// Screen 5-15 variables (from second code, renumbered)
 let textFlowIndex = 0;
+let playlistComments = [
+  '사람마다 마지막이 다르듯, 마지막을 기억하는 방식도 다릅니다. 어떤 분은 조용히, 어떤 분은 웃으며, 또 어떤 분은 꼭 참던 눈물을 흘리며 당신을 떠올릴 겁니다.\n그래서 음악이 필요하죠. 장례식의 공기는 곡 하나로 바뀌거든요.',
+  '이건 당신이 남기는 첫 번째 선택이에요. \n슬퍼도 괜찮고, 신나도 아무도 뭐라 안 합니다. \n남겨질 사람들이 당신을 떠올리며 이 노래를 들을 테니, 어떻게 추억되고 싶은지 노래로 표현해보세요.',
+  '자, 이제 마음 속에 떠오르는 노래가 있다면 검색창에 넣어보세요. \n원하는 노래를 자유롭게 플레이리스트에 담으면 됩니다. \n한 곡만으로 부족하다면 더 넣으셔도 되고요. 인생이라는 게, 한 곡으로는 설명이 안 되잖아요?',
+  '재생 버튼을 누르시면 미리 들어보실 수도 있어요. 분위기 확인용으로. \n그럼 장례식장 플레이리스트, 골라보실까요? \n너무 오래 걸리셔도… 조금 곤란하긴 해요. 시간이 그렇게 많진 않거든요.',
+]
 let pictureComments = [
   '다음은 사진을 찍을게요. 이왕 죽음을 미리 준비하는 거, 남겨진 사람들이 보고 추억할 만한 사진 하나 있으면 좋잖아요.',
   '준비되셨다면, 촬영 버튼을 눌러서 직접 찍으시면 돼요.',
@@ -54,6 +36,23 @@ let dressComments = [
   '손님들이 꼭 검정색 옷만 입고 올 필요 있을까요?',
   '여기 옷장에 걸린 옷들 중에서 자유롭게 골라보세요.'
 ];
+let endingcreditsComments = [
+  '이렇게 모든 설계가 마무리됐습니다.\n음악도 정했고, 영정사진도 찍었고, 공간도 꾸몄고, 먹고 마실 것도 빠짐없이 준비하셨어요.',
+  '장례식에서 정할 게 꽤 많았죠? 그래도 나의 마지막 순간인데, 내가 직접 정할 기회가 없으면 너무 억울하잖아요.\n당신다운, 당신만의 마지막을 잘 꾸미신 것 같네요.',
+  '이제는… 정말 떠나야 할 시간입니다.\n하지만 걱정 마세요. 당신이 고른 이 모든 것들은, 누군가의 기억 속에서 천천히 재생될 거예요.\n마지막 순간이 어떻게 기억될지 직접 하나하나 골랐으니 후회도 없을 겁니다.',
+  '이번 삶에서의 모든 순간 동안 너무 수고 많으셨습니다.\n마지막으로 나 삶의 엔딩 크레딧을 한 번 작성해볼게요.\n내 인생이 영화라면, 엔딩 크레딧을 어떻게 올리고 싶으세요?'
+];
+let endingComments = [
+  '멋진 엔딩크레딧이 되겠군요. 수고 많았어요.\n이제 당신이 하나하나 꾸민 장례식장의 모습을 확인할 차례예요.',
+  '오직 당신만을 위한 끝내주는 파티가 되겠네요.\n죽음에 대한 근심, 걱정은 잠시 내려두고 이 파티를 조금만 즐겨보세요.'
+];
+
+let searchInput, searchButton, playButton;
+let searchResults = [];
+let playlist = [];
+let player;
+let currentPlayingIndex = 0;
+let playerReady = false;
 
 let dayButton = ['크리스마스', '할로윈', '생일파티', '파자마 파티', '댄스 파티', '사교 파티'];
 let flowerButton = ['슬픔', '기쁨', '분노'];
@@ -74,25 +73,69 @@ let rightRibbonText = '';
 let selectedDressIndex = -1;
 let deathImage, table, belowtable, frame, hanger;
 let dayImages = ['크리스마스', '할로윈', '생일파티', '파자마 파티', '댄스 파티', '사교 파티'];
-let selections = [];
-let selectedDay = null;
-let selectedFlowerIndex = -1;
-let selectedFoodIndex = -1;
-let leftRibbonTexts = [];
-let rightRibbonTexts = [];
-let selectedDayIndex = -1;
-let selectedFlowerButtonIndex = -1;
-let selectedFoodIndexButton = -1;
+
+// New variables for selections
+let selections = []; // 모든 선택 사항 저장: [capturedImage, selectedDay, selectedFlower, selectedFood, selectedDress]
+let selectedDay = null; // 화면 11에서 고정된 날짜 텍스트
+let selectedFlowerIndex = -1; // 화면 13에서 고정된 꽃 인덱스
+let selectedFoodIndex = -1; // 화면 15에서 고정된 음식 인덱스
+let leftRibbonTexts = []; // 저장된 왼쪽 리본 텍스트
+let rightRibbonTexts = []; // 저장된 오른쪽 리본 텍스트
+let selectedDayIndex = -1; // 선택된 날짜 버튼 인덱스
+let selectedFlowerButtonIndex = -1; // 선택된 꽃 버튼 인덱스
+let selectedFoodIndexButton = -1; // 선택된 음식 버튼 인덱스
+
+let endingQuestions = [
+  "내 인생의 목표는 무엇이었나?",
+  "가장 자랑스러웠던 일은 무엇이었나?",
+  "가장 미안한 사람은 누구인가?",
+  "가장 행복했던 순간은 언제였나?",
+  "자주 숨기고 살았던 감정은 무엇인가?",
+  "나를 자주 울게 만든 일은 무엇이었나?",
+  "끝까지 포기하지 않았던 것은 무엇이었나?",
+  "다시 도전해보고 싶은 일은 무엇인가?",
+  "가장 자주 찾은 장소는 어디였나?",
+  "‘나’를 기억할 단 한 장면이 있다면, 어떤 모습이었으면 좋을까?",
+  "이 삶에서 배운 가장 큰 교훈은 무엇이었나?",
+  "나에게 ‘죽음’은 어떤 의미인가?",
+  "지금 떠나며 아쉬운 것이 있다면?",
+  "내 장례식에 꼭 와줬으면 하는 사람들은 누구인가?",
+  "마지막으로 남기고 싶은 말은 무엇인가?"
+];
+let currentQuestionIndex = 0;
+let endingCredits = [];
+let answerInput;
+
+let creditScrollY = 0;
+let scrollSpeed = 0.7;
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  textAlign(CENTER, CENTER);
+  rectMode(CENTER);
+  noStroke();
+
+  // 검색창 및 버튼
+  searchInput = createInput();
+  searchInput.position(100, 50);
+  searchInput.size(300);
+  searchInput.hide();
+  searchButton = createButton('검색');
+  searchButton.position(410, 50);
+  searchButton.mousePressed(() => {
+    let query = searchInput.value();
+    if (query) searchYouTube(query);
+  });
+  searchButton.hide();
+
+  playButton = createButton('▶️ 재생');
+  playButton.position(500, 50);
+  playButton.mousePressed(playPlaylist);
+  playButton.hide();
+}
 
 function preload() {
-  // First code assets
-  envelopeImg = loadImage("envelope.png");
-  fontHead1 = loadFont("fonts/IropkeBatangM.woff");
-  fontHead2 = loadFont("fonts/NotoSansKR-ExtraBold.ttf");
-  fontHead3 = loadFont("fonts/NotoSansKR-Bold.ttf");
-  fontHead4 = loadFont("fonts/NotoSansKR-Regular.ttf");
-
-  // Second code assets (renumbered screens 5-15)
+  // 이미지 로드 함수 정의
   function loadImageWithError(path) {
     let img = loadImage(path, 
       () => console.log(`Loaded: ${path}`), 
@@ -142,17 +185,16 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   textAlign(CENTER, CENTER);
   rectMode(CENTER);
-  noStroke();
   imageMode(CORNER);
+  noStroke();
 
-  // Screen 4 setup (YouTube search)
+  // 플레이리스트 검색창 및 버튼
   searchInput = createInput();
-  searchInput.position(400, 60);
-  searchInput.size(500);
+  searchInput.position(100, 50);
+  searchInput.size(300);
   searchInput.hide();
-
   searchButton = createButton('검색');
-  searchButton.position(910, 60);
+  searchButton.position(410, 50);
   searchButton.mousePressed(() => {
     let query = searchInput.value();
     if (query) searchYouTube(query);
@@ -160,15 +202,11 @@ function setup() {
   searchButton.hide();
 
   playButton = createButton('▶️ 재생');
-  playButton.position(50, height - 80);
+  playButton.position(500, 50);
   playButton.mousePressed(playPlaylist);
   playButton.hide();
 
-  let playerDiv = createDiv();
-  playerDiv.id('player');
-  playerDiv.position(-9999, -9999);
-
-  // Screen 5-15 setup (camera and ribbon inputs)
+  //캠 설정
   try {
     cam = createCapture(VIDEO);
     if (cam) {
@@ -203,177 +241,112 @@ function setup() {
 }
 
 function draw() {
-  background(127, 127, 127);
+  background(220);
+  imageMode(CORNER);
 
-  // Hide screen 4 and 5-15 inputs by default
-  searchInput.hide();
-  searchButton.hide();
-  playButton.hide();
   flowerModeButton.hide();
   textModeButton.hide();
   leftRibbonInput.hide();
   rightRibbonInput.hide();
 
-  if (currentScreen === 1) {
-    drawScreen1();
-  } else if (currentScreen === 2) {
-    drawScreen2();
-  } else if (currentScreen === 3) {
-    drawScreen3();
-  } else if (currentScreen === 4) {
-    drawScreen4();
-    searchInput.show();
-    searchButton.show();
-    playButton.show();
-  } else if (currentScreen === 5) {
-    drawScreen5();
-    drawNextButton();
-  } else if (currentScreen === 6) {
-    drawScreen6();
-    drawNextButton();
-  } else if (currentScreen === 7) {
-    drawScreen7();
-    drawNextButton();
-  } else if (currentScreen === 8) {
-    drawScreen8();
-    drawNextButton();
-  } else if (currentScreen === 9) {
-    drawScreen9();
-    drawNextButton();
-  } else if (currentScreen === 10) {
-    drawScreen10();
-    drawNextButton();
-  } else if (currentScreen === 11) {
-    drawScreen11();
-    drawNextButton();
-  } else if (currentScreen === 12) {
-    drawScreen12();
-    drawNextButton();
-  } else if (currentScreen === 13) {
-    drawScreen13();
-    drawNextButton();
-    if (currentMode === '글') {
-      leftRibbonInput.show();
-      rightRibbonInput.show();
-    }
-    flowerModeButton.show();
-    textModeButton.show();
-  } else if (currentScreen === 14) {
-    drawScreen14();
-    drawNextButton();
-  } else if (currentScreen === 15) {
-    drawScreen15();
-    drawNextButton();
-  } else if (currentScreen === 16) {
-    drawScreen16(); // Renamed from drawScreen10
+  if (currentScreen === 1) drawScreen1();
+  else if (currentScreen === 2) drawScreen2();
+  else if (currentScreen === 3) drawScreen3();
+  else if (currentScreen === 4) drawScreen4();
+  else if (currentScreen === 5) drawScreen5();
+  else if (currentScreen === 7) drawScreen7();
+  else if (currentScreen === 8) drawScreen8();
+  else if (currentScreen === 9) drawScreen9();
+  else if (currentScreen === 10) drawScreen10();
+  else if (currentScreen === 11) drawScreen11();
+  else if (currentScreen === 12) drawScreen12();
+  else if (currentScreen === 13) drawScreen13();
+  else if (currentScreen === 14) drawScreen14();
+  else if (currentScreen === 15) drawScreen15();
+  else if (currentScreen === 16) drawScreen16();
+  else if (currentScreen === 17) drawScreen17();
+  else if (currentScreen === 18) drawScreen18();
+  else if (currentScreen === 19) drawScreen19();
+  else if (currentScreen === 20) drawScreen20();
+  else if (currentScreen === 21) drawScreen21();
+}
+
+function drawNextButton() {
+  // 다음 버튼을 화면 오른쪽 아래에 표시
+  let btnX = width * 0.9, btnY = height * 0.9, btnWidth = 100, btnHeight = 40;
+  fill(180);
+  stroke(0);
+  rectMode(CENTER);
+  rect(btnX, btnY, btnWidth, btnHeight, 5);
+  fill(0);
+  textSize(15);
+  textAlign(CENTER, CENTER);
+  text('다음으로', btnX, btnY);
+}
+
+function drawText(commentsArray) {
+  // 텍스트와 함께 죽음 이미지를 중앙에 표시
+  imageMode(CENTER);
+  image(deathImage, width / 2, height * 2 / 5, 480, 640);
+  fill(50);
+  textSize(28);
+  textAlign(CENTER, CENTER);
+  if (textFlowIndex >= 0 && textFlowIndex < commentsArray.length) {
+    text(commentsArray[textFlowIndex], width / 2, height * 4 / 5);
   }
 }
 
-// Screen 1
 function drawScreen1() {
+  fill(0);
+  textSize(32);
+  text("내 인생의 엔딩 크레딧", width / 2, height / 2 - 100);
+  textSize(18);
+  text("당신의 마지막을 직접 설계해보시겠습니까?", width / 2, height / 2 - 40);
+
+  let btnX = width / 2;
+  let btnY = height / 2 + 30;
+  let btnW = 100;
+  let btnH = 40;
+
+  if (
+    mouseX > btnX - btnW / 2 &&
+    mouseX < btnX + btnW / 2 &&
+    mouseY > btnY - btnH / 2 &&
+    mouseY < btnY + btnH / 2
+  ) {
+    fill(230);
+  } else {
+    fill(245);
+  }
+  stroke(150);
+  rect(btnX, btnY, btnW, btnH, 10);
+  noStroke();
+  fill(0);
+  textSize(16);
+  text("시작하기", btnX, btnY);
+}
+
+function drawScreen2() {
+  fill(230);
+  noStroke();
   let bx = width / 2;
   let by = height / 2;
-  let imgWidth = 100;
-  let imgHeight = 100;
+  fill(245);
+  rect(bx, by, 100, 70);
+  fill(180);
+  triangle(bx - 50, by - 35, bx + 50, by - 35, bx, by + 10);
 
-  imageMode(CENTER);
-  let isHovering = mouseX > bx - imgWidth / 2 && mouseX < bx + imgWidth / 2 &&
-                   mouseY > by - imgHeight / 2 && mouseY < by + imgHeight / 2;
-  screen1TargetScale = isHovering ? 1.7 : 1.3;
-  screen1ScaleFactor = lerp(screen1ScaleFactor, screen1TargetScale, 0.1);
-
-  push();
-  translate(bx, by);
-  scale(screen1ScaleFactor);
-  image(envelopeImg, 0, 0, imgWidth, imgHeight);
-  pop();
-
-  let badgeOffsetX = imgWidth / 2 * screen1ScaleFactor;
-  let badgeOffsetY = imgHeight / 2 * screen1ScaleFactor;
-  let badgeX = bx + badgeOffsetX - 10;
-  let badgeY = by - badgeOffsetY + 35;
-  let badgeSize = 30;
-
-  drawingContext.shadowBlur = 8;
-  drawingContext.shadowColor = 'rgba(0, 0, 0, 0.3)';
-  drawingContext.shadowOffsetX = 0;
-  drawingContext.shadowOffsetY = 0;
-
-  fill(255, 70, 70);
-  noStroke();
-  ellipse(badgeX, badgeY, badgeSize, badgeSize);
-
-  drawingContext.shadowBlur = 0;
-  drawingContext.shadowOffsetX = 0;
-  drawingContext.shadowOffsetY = 0;
-
-  fill(255);
-  textSize(12);
-  textAlign(CENTER, CENTER);
-  textFont(fontHead4);
-  text("1", badgeX, badgeY - 4);
-
-  let textStr = screen1Text.substring(0, screen1CurrentIndex);
-  textFont(fontHead4);
-  textSize(18);
-  let tw = textWidth(textStr);
-  let th = 18;
-  let paddingX = 40;
-  let paddingY = 30;
-  let bubbleX = width / 2;
-  let bubbleY = height / 2 + 100 + th / 2 + paddingY / 2;
-  let bubbleW = tw + paddingX * 2;
-  let bubbleH = th + paddingY;
-
-  let alphaValue = map(sin(frameCount * 0.05), -1, 1, 0.4, 1);
-  drawingContext.save();
-  drawingContext.globalAlpha = alphaValue;
-  drawSpeechBubble(bubbleX, bubbleY, bubbleW, bubbleH, 12);
-  fill(80);
-  noStroke();
-  textSize(18);
-  textAlign(CENTER);
-  textFont(fontHead4);
-  if (frameCount % screen1TypingSpeed === 0 && screen1CurrentIndex < screen1Text.length) {
-    screen1CurrentIndex++;
+  if (mouseX > bx - 50 && mouseX < bx + 50 && mouseY > by - 35 && mouseY < by + 35) {
+    fill(0, 0, 0, 20);
+    rect(bx, by, 100, 70);
   }
-  let displayedText = screen1Text.substring(0, screen1CurrentIndex);
-  text(displayedText, bubbleX, bubbleY - 5);
-  drawingContext.restore();
+
+  fill(80);
+  textSize(18);
+  text("저승사자 님으로부터 메일이 도착하였습니다.", width / 2, height / 2 + 100);
 }
 
-function drawSpeechBubble(x, y, w, h, r) {
-  drawingContext.shadowBlur = 16;
-  drawingContext.shadowColor = 'rgba(0, 0, 0, 0.2)';
-  drawingContext.shadowOffsetX = 0;
-  drawingContext.shadowOffsetY = 0;
-
-  fill(238);
-  stroke(167, 141, 111);
-  strokeWeight(2);
-
-  beginShape();
-  vertex(x - w / 2 + r, y - h / 2);
-  bezierVertex(x - w / 2, y - h / 2, x - w / 2, y - h / 2, x - w / 2, y - h / 2 + r);
-  vertex(x - w / 2, y + h / 2 - r);
-  bezierVertex(x - w / 2, y + h / 2, x - w / 2, y + h / 2, x - w / 2 + r, y + h / 2);
-  vertex(x - 10, y + h / 2);
-  vertex(x, y + h / 2 + 15);
-  vertex(x + 10, y + h / 2);
-  vertex(x + w / 2 - r, y + h / 2);
-  bezierVertex(x + w / 2, y + h / 2, x + w / 2, y + h / 2, x + w / 2, y + h / 2 - r);
-  vertex(x + w / 2, y - h / 2 + r);
-  bezierVertex(x + w / 2, y - h / 2, x + w / 2, y - h / 2, x + w / 2 - r, y - h / 2);
-  vertex(x - w / 2 + r, y - h / 2);
-  endShape(CLOSE);
-
-  drawingContext.shadowBlur = 0;
-  drawingContext.shadowOffsetX = 0;
-  drawingContext.shadowOffsetY = 0;
-}
-
-// Screen 2
-function drawScreen2() {
+function drawScreen3() {
   fill(240);
   stroke(180);
   rect(width / 2, height / 2, 600, 350, 5);
@@ -382,7 +355,6 @@ function drawScreen2() {
   rect(width / 2, height / 2 - 140, 600, 30);
   fill(100);
   textSize(20);
-  textFont(fontHead4);
   text("귀하의 사망예정일을 알려드립니다", width / 2, height / 2 - 80);
   textSize(14);
   text("보낸사람 저승사자 <support@jeoseung.com>", width / 2, height / 2 - 55);
@@ -395,7 +367,13 @@ function drawScreen2() {
   let by = height / 2 + 80;
   let bw = 250;
   let bh = 40;
-  if (mouseX > bx - bw / 2 && mouseX < bx + bw / 2 && mouseY > by - bh / 2 && mouseY < by + bh / 2) {
+
+  if (
+    mouseX > bx - bw / 2 &&
+    mouseX < bx + bw / 2 &&
+    mouseY > by - bh / 2 &&
+    mouseY < by + bh / 2
+  ) {
     fill(200);
   } else {
     fill(230);
@@ -405,158 +383,89 @@ function drawScreen2() {
   text("장례식 컨설팅 바로가기", bx, by);
 }
 
-// Screen 3
-function drawScreen3() {
-  background(238);
-
-  fill(255);
-  stroke(180);
-  rect(width / 2, 60, width * 0.95, 30, 3);
-  fill(255, 90, 90); circle(35, 60, 12);
-  fill(255, 220, 80); circle(55, 60, 12);
-  fill(70, 200, 100); circle(75, 60, 12);
-
-  fill(240);
-  stroke(180);
-  rect(width * 0.25, 60, 120, 30, 5, 5, 0, 0);
-  fill(80);
-  noStroke();
-  textSize(14);
-  textFont(fontHead4);
-  text("메일", width * 0.25, 60);
-
-  fill(255);
-  stroke(180);
-  rect(width * 0.45, 60, 140, 30, 5, 5, 0, 0);
-  fill(100);
-  text("웹사이트 이름", width * 0.45, 60);
-
-  fill(70);
-  textSize(28);
-  text("내 인생의 엔딩 크레딧", width / 2, 140);
-  textSize(18);
-  text("캐치프레이즈", width / 2, 175);
-
-  let btns = {
-    "플레이리스트 선곡": { x: width * 0.2, y: height * 0.45 },
-    "장례식장 꾸미기": { x: width * 0.25, y: height * 0.6 },
-    "화환 꾸미기": { x: width * 0.5, y: height * 0.52 },
-    "장례식 식사 큐레이팅": { x: width * 0.75, y: height * 0.45 },
-    "장례식 초대장 작성": { x: screen1CurrentIndex * 0.7, y: height * 0.6 }
-  };
-
-  stroke(120);
-  strokeWeight(1);
-  line(btns["플레이리스트 선곡"].x, btns["플레이리스트 선곡"].y, btns["장례식장 꾸미기"].x, btns["장례식장 꾸미기"].y);
-  line(btns["플레이리스트 선곡"].x, btns["플레이리스트 선곡"].y, btns["화환 꾸미기"].x, btns["화환 꾸미기"].y);
-  line(btns["화환 꾸미기"].x, btns["화환 꾸미기"].y, btns["장례식 식사 큐레이팅"].x, btns["장례식 식사 큐레이팅"].y);
-  line(btns["장례식 식사 큐레이팅"].x, btns["장례식 식사 큐레이팅"].y, btns["장례식 초대장 작성"].x, btns["장례식 초대장 작성"].y);
-  noStroke();
-
-  let w = 180;
-  let h = 45;
-  textSize(14);
-  for (let label in btns) {
-    let x = btns[label].x;
-    let y = btns[label].y;
-    if (mouseX > x - w / 2 && mouseX < x + w / 2 && mouseY > y - h / 2 && mouseY < y + h / 2) {
-      fill(210);
-    } else {
-      fill(240);
+// 유튜브 IFrame API 준비 후 호출됨
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('invisible-player', {
+    height: '1',
+    width: '1',
+    videoId: '',  // 처음엔 비워 두되, 나중에 loadVideoById로 재생
+    playerVars: {
+      autoplay: 0, // 처음엔 자동 재생 안 함 (mute+클릭 후에 재생 유도)
+      controls: 0, // 컨트롤 바 숨김
+      modestbranding: 1, // 유튜브 로고 최소화
+      rel: 0, // 관련 동영상 표시 안 함
+      playsinline: 1, // 모바일에서 전체화면 막기
+      origin: window.location.origin // 쿠키/CORS 관련 보안 대응
+    },
+    events: {
+      onReady: () => {
+        playerReady = true;
+        // autoplay는 유저 인터랙션 이후에만 → mute 후 재생 권장
+      },
+      onStateChange: onPlayerStateChange,
     }
-    stroke(150);
-    strokeWeight(1);
-    rect(x, y, w, h, 30);
-    noStroke();
-    fill(50);
-    text(label, x, y);
+  });
+}
+
+function playVideoById(videoId) {
+  if (playerReady) {
+    player.mute();  // 사용자 상호작용 없이 autoplay하려면 mute 필수
+    player.loadVideoById(videoId);
+    player.playVideo();
   }
 }
 
-// Screen 4
 function drawScreen4() {
-  background(245);
+  drawNextButton();
+  drawText(playlistComments);
+}
 
-  fill(255);
-  stroke(180);
-  rect(width / 2, 60, width * 0.95, 30, 5);
-  fill(255, 90, 90); circle(35, 60, 12);
-  fill(255, 220, 80); circle(55, 60, 12);
-  fill(70, 200, 100); circle(75, 60, 12);
+function drawScreen5() {
+  background(255);
+  drawNextButton();
 
-  let tabY = 60;
-  let tabH = 30;
-  let mailX = width * 0.22;
-  let siteX = width * 0.42;
-  let inviteX = width * 0.55;
+  // UI 보이기
+  searchInput.show();
+  searchButton.show();
+  playButton.show();
 
-  fill(255);
-  stroke(180);
-  rect(mailX, tabY, 120, tabH, 5, 5, 0, 0);
-  fill(100);
-  noStroke();
-  textAlign(CENTER, CENTER);
-  textSize(14);
-  textFont(fontHead4);
-  text("메일", mailX, tabY);
+  fill(0);
+  textSize(24);
+  text("마지막으로 단 4곡만 들을 수 있다면, 듣고 싶은 노래는?", width / 2, 100);
 
-  fill(230);
-  stroke(180);
-  rect(siteX, tabY, 160, tabH, 5, 5, 0, 0);
-  fill(100);
-  text("플레이리스트 선곡", siteX, tabY);
-
-  let isHoverInvite = mouseX > inviteX - 90 && mouseX < inviteX + 90 && mouseY > tabY - tabH / 2 && mouseY < tabY + tabH / 2;
-  fill(isHoverInvite ? 230 : 255);
-  stroke(180);
-  rect(inviteX, tabY, 180, tabH, 5, 5, 0, 0);
-  fill(100);
-  text("초대장 작성", inviteX, tabY);
-
-  fill(30);
-  textSize(18);
-  textAlign(LEFT, CENTER);
-  text("나의 장례식 플레이리스트", 50, 120);
-  for (let i = 0; i < playlist.length; i++) {
-    fill(255);
-    rect(50, 150 + i * 80, 300, 70, 10);
-    if (playlist[i].thumbnailImg) {
-      image(playlist[i].thumbnailImg, 60, 155 + i * 80, 60, 60);
-    }
+  // 검색 결과 보여주기
+  textSize(16);
+  for (let i = 0; i < searchResults.length; i++) {
+    let y = 150 + i * 40;
+    fill(230);
+    rect(width / 2, y, 500, 30, 10);
     fill(0);
-    text(playlist[i].title, 130, 170 + i * 80);
-    text(playlist[i].artist, 130, 190 + i * 80);
+    text(searchResults[i].title, width / 2, y);
   }
 
-  fill(20);
+  // 현재 재생목록 보여주기
   textSize(18);
-  text("검색 결과", 400, 140);
-  for (let i = 0; i < searchResults.length; i++) {
-    let x = 400;
-    let y = 170 + i * 80;
-    fill(255);
-    rect(x, y, 600, 70, 10);
-    if (searchResults[i].thumbnailImg) {
-      image(searchResults[i].thumbnailImg, x + 10, y + 5, 60, 60);
-    }
-    fill(0);
-    text(searchResults[i].title, x + 80, y + 25);
-    text(searchResults[i].artist, x + 80, y + 45);
+  text("▶ 플레이리스트", 150, height - 200);
+  textSize(14);
+  for (let i = 0; i < playlist.length; i++) {
+    text(`- ${playlist[i].title}`, 150, height - 170 + i * 20);
   }
 }
 
-// Screen 5 
-function drawScreen5() {
+function drawScreen7() {
+  // 화면 7: 사진 찍기 전 안내 문구 표시
+  drawNextButton();
   drawText(pictureComments);
 }
 
-// Screen 6 
-function drawScreen6() {
+function drawScreen8() {
+  // 화면 8: 웹캠을 통해 사진을 찍는 화면
+  drawNextButton();
   let camDrawWidth = width * 0.5, camDrawHeight = height * 0.8;
   let camX = (width - camDrawWidth) / 2, camY = (height - camDrawHeight) / 2 - 60;
 
   push();
-  translate(camX + camDrawWidth, camY);
+  translate(camX + camDrawWidth, camY); // 오른쪽 끝으로 이동 후 좌우 반전
   scale(-1, 1);
   if (cam && cam.elt.readyState === 4) {
     image(cam, 0, 0, camDrawWidth, camDrawHeight);
@@ -577,41 +486,49 @@ function drawScreen6() {
   fill(255);
   textSize(20);
   textAlign(CENTER, CENTER);
-  textFont(fontHead4);
   text(shootButton.label, shootButton.x, shootButton.y);
 }
 
-// Screen 7 
-function drawScreen7() {
+function drawScreen9() {
+  // 화면 9: 찍은 사진을 프레임에 표시
+  drawNextButton();
   if (capturedImage && capturedImage.width > 0 && capturedImage.height > 0) {
     imageMode(CENTER);
     let displayWidth = capturedImage.width / 3, displayHeight = capturedImage.height / 3;
     let imgX = width / 3, imgY = height / 2;
 
+    // 테이블 그리기
+    imageMode(CENTER);
     image(table, imgX, imgY + displayHeight / 2 + 50, displayWidth + 60, displayHeight + 60);
+
+    // 프레임 그리기
     image(frame, imgX, imgY, displayWidth + 50, displayHeight + 50);
+
+    // 캡처된 이미지 그리기 (이미 좌우 반전된 상태)
     image(capturedImage, imgX, imgY, displayWidth - 60, displayHeight + 5);
+
+    // 아래 테이블 부분 그리기
     image(belowtable, imgX, imgY + displayHeight / 2 + 80, displayWidth / 2, displayHeight / 2);
   } else {
     fill(0);
     textSize(20);
     textAlign(CENTER, CENTER);
-    textFont(fontHead4);
     text("캡처된 이미지가 없습니다.\n이전 화면으로 돌아가 촬영하세요.", width / 2, height / 2);
   }
 }
 
-// Screen 8 (was 10)
-function drawScreen8() {
+function drawScreen10() {
+  // 화면 10: 데코레이션 선택 전 안내 문구 표시
+  drawNextButton();
   drawText(decoComments);
 }
 
-// Screen 9 (was 11)
-function drawScreen9() {
+function drawScreen11() {
+  // 화면 11: 가장 즐거웠던 하루 선택
+  drawNextButton();
   textSize(30);
   fill(0);
   textAlign(LEFT, CENTER);
-  textFont(fontHead4);
   text('내 인생에서', width / 7, height / 7);
   text('가장 즐거웠던 하루는?', width / 7, height / 7 + 50);
 
@@ -620,9 +537,17 @@ function drawScreen9() {
     let displayWidth = capturedImage.width / 3, displayHeight = capturedImage.height / 3;
     let imgX = width / 3, imgY = height / 2;
 
+    // 테이블 그리기
+    imageMode(CENTER);
     image(table, imgX, imgY + displayHeight / 2 + 50, displayWidth + 60, displayHeight + 60);
+
+    // 프레임 그리기
     image(frame, imgX, imgY, displayWidth + 50, displayHeight + 50);
+
+    // 캡처된 이미지 그리기
     image(capturedImage, imgX, imgY, displayWidth - 60, displayHeight + 5);
+
+    // 아래 테이블 부분 그리기
     image(belowtable, imgX, imgY + displayHeight / 2 + 80, displayWidth / 2, displayHeight / 2);
   }
 
@@ -634,88 +559,100 @@ function drawScreen9() {
     }
   });
 
+  // 선택된 또는 호버된 날짜 텍스트 표시
   if (selectedDay) {
     textSize(40);
     fill(0);
     textAlign(CENTER, CENTER);
-    textFont(fontHead4);
     text(selectedDay, width / 3, height / 2);
   } else if (hoveredDayIndex >= 0) {
     textSize(40);
     fill(0);
     textAlign(CENTER, CENTER);
-    textFont(fontHead4);
     text(dayButton[hoveredDayIndex], width / 3, height / 2);
   }
 }
 
-// Screen 10 (was 12)
-function drawScreen10() {
+function drawScreen12() {
+  // 화면 12: 화환 선택 전 안내 문구 표시
+  drawNextButton();
   drawText(flowerComments);
 }
 
-// Screen 11 (was 13)
-function drawScreen11() {
+function drawScreen13() {
+  // 화면 13: 화환과 메시지 선택
+  drawNextButton();
+  flowerModeButton.show();
+  textModeButton.show();
   textAlign(LEFT, TOP);
   textSize(30);
   fill(0);
-  textFont(fontHead4);
   text('내 인생을\n하나의 감정으로 요약한다면?', width / 20, height / 20);
 
   let hoveredIndex = -1;
   if (currentMode === '꽃') {
+    leftRibbonInput.hide();
+    rightRibbonInput.hide();
     drawButtonGrid(flowerButton, 1, 3, (i, j) => {
       let buttonIndex = i * 3 + j;
       if (buttonIndex < flowerImages.length) {
         hoveredIndex = buttonIndex;
       }
     });
+  } else if (currentMode === '글') {
+    leftRibbonInput.show();
+    rightRibbonInput.show();
   }
 
   imageMode(CENTER);
+  // 선택된 꽃이 있으면 표시, 없으면 호버된 또는 기본 꽃 표시
   if (selectedFlowerIndex >= 0) {
     image(flowerImages[selectedFlowerIndex], width / 3, height / 2, 550, 700);
+    // 왼쪽 리본에 텍스트 표시
     if (leftRibbonTexts.length > 0) {
       push();
-      translate(width / 3 - 55, height / 2 - 100);
-      rotate(-PI / 3);
+      translate(width / 3 - 55, height / 2 - 100); // 간격 1/2배로 줄임
+      rotate(-PI / 3); // -60도
       textSize(20);
       fill(0);
       textAlign(CENTER, CENTER);
-      textFont(fontHead4);
-      text(leftRibbonTexts[leftRibbonTexts.length - 1], 0, 0, 150, 50);
+      text(leftRibbonTexts[leftRibbonTexts.length - 1], 0, 0, 150, 50); // 마지막 입력값만 표시
       pop();
     }
+    // 오른쪽 리본에 텍스트 표시
     if (rightRibbonTexts.length > 0) {
       push();
-      translate(width / 3 + 55, height / 2 - 100);
-      rotate(PI / 3);
+      translate(width / 3 + 55, height / 2 - 100); // 간격 1/2배로 줄임
+      rotate(PI / 3); // +60도
       textSize(20);
       fill(0);
       textAlign(CENTER, CENTER);
-      textFont(fontHead4);
-      text(rightRibbonTexts[rightRibbonTexts.length - 1], 0, 0, 150, 50);
+      text(rightRibbonTexts[rightRibbonTexts.length - 1], 0, 0, 150, 50); // 마지막 입력값만 표시
       pop();
     }
   } else {
     let displayImage = hoveredIndex >= 0 ? flowerImages[hoveredIndex] : flowerImages[0];
     image(displayImage, width / 3, height / 2, 550, 700);
   }
+
+  if (currentMode === '글') {
+    // enter 키를 누를 때까지 텍스트 미리 표시하지 않음
+  }
 }
 
-// Screen 12 (was 14)
-function drawScreen12() {
+function drawScreen14() {
+  // 화면 14: 음식 선택 전 안내 문구 표시
+  drawNextButton();
   drawText(foodComments);
 }
 
-// Screen 13 (was 15)
-function drawScreen13() {
+function drawScreen15() {
+  drawNextButton();
   textAlign(LEFT, TOP);
   textSize(30);
   fill(0);
-  textFont(fontHead4);
   text('내 생애 가장\n좋아했던 음식은?', width / 20, height / 20);
-
+  // 화면 15: 음식 선택
   let hoveredIndex = -1;
   drawButtonGrid(foodButton, 2, 3, (i, j) => {
     let buttonIndex = i * 3 + j;
@@ -725,6 +662,7 @@ function drawScreen13() {
   });
 
   imageMode(CENTER);
+  // 선택된 음식이 있으면 표시, 없으면 호버된 음식 표시
   if (selectedFoodIndex >= 0) {
     image(foodImages[selectedFoodIndex], width / 3, height / 2, 550, 700);
   } else if (hoveredIndex >= 0) {
@@ -732,23 +670,23 @@ function drawScreen13() {
   }
 }
 
-// Screen 14 (was 16)
-function drawScreen14() {
+function drawScreen16() {
+  // 화면 16: 드레스 선택 전 안내 문구 표시
+  drawNextButton();
   drawText(dressComments);
 }
 
-// Screen 15 (was 17)
-function drawScreen15() {
+function drawScreen17() {
+  drawNextButton();
   textAlign(LEFT, TOP);
   textSize(30);
   fill(0);
-  textFont(fontHead4);
   text('내 인생에서 나는\n어떤 옷을 입었나?', width / 20, height / 20);
-
+  // 화면 17: 드레스 선택
   let hangX = width / 3;
   let hangY = height / 2;
   let hangW = width / 2.5;
-  let hangH = height * 0.8;
+  let hangH = height * 0.8; 
 
   imageMode(CENTER);
   image(hanger, hangX, hangY, hangW, hangH);
@@ -762,7 +700,7 @@ function drawScreen15() {
 
   for (let i = 0; i < numImages; i++) {
     let imgX = hangX - hangW / 2 + spacing * (i + 1) + imgWidth * i;
-    let imgY = hangY + hangH / 2 - 100;
+    let imgY = hangY + hangH / 2 - 100; // y축 100 더 올림
     let imgCenterX = imgX + imgWidth / 2;
     let imgCenterY = imgY + imgHeight / 2;
 
@@ -776,154 +714,146 @@ function drawScreen15() {
     push();
     translate(imgCenterX, imgCenterY);
     if (isHovering) {
-      scale(1.2);
+      scale(1.2); // 호버링 시 커지도록
     }
     imageMode(CENTER);
-    image(dresshalfImages[i], 0, -300, displayWidth, displayHeight);
+    image(dresshalfImages[i], 0, -300, displayWidth, displayHeight); // 옷 상단 정렬
     pop();
   }
 
   let displayIndex = selectedDressIndex !== -1 ? selectedDressIndex : hoverIndex;
   if (displayIndex >= 0 && displayIndex < dressImages.length) {
     imageMode(CENTER);
-    image(dressImages[displayIndex], width * 2 / 3 + width * 0.125, height / 2, 240, 320);
+    image(dressImages[displayIndex], width * 2 / 3 + width * 0.125, height / 2, 240, 320); // 오른쪽에 표시
   }
 }
 
-// Screen 16 (was 10)
-function drawScreen16() {
-  background(238);
+function drawScreen18() {
+  drawNextButton();
+  drawText(endingcreditsComments);
+}
 
-  fill(255);
-  stroke(180);
-  rect(width / 2, 60, width * 0.95, 30, 5);
-  fill(255, 90, 90); circle(35, 60, 12);
-  fill(255, 220, 80); circle(55, 60, 12);
-  fill(70, 200, 100); circle(75, 60, 12);
+function drawScreen19() {
+  background(255);
 
-  let tabY = 60;
-  let tabH = 30;
-  let mailX = width * 0.22;
-  let siteX = width * 0.42;
-  let inviteX = width * 0.55;
+  // 질문 영역
+  fill(0);
+  textSize(20);
+  textAlign(CENTER);
+  text("엔딩 크레딧 작성을 위한 질문", width / 2, 150);
 
-  fill(255);
-  stroke(180);
-  rect(mailX, tabY, 120, tabH, 5, 5, 0, 0);
-  fill(100);
-  noStroke();
-  textAlign(CENTER, CENTER);
-  textSize(14);
-  textFont(fontHead4);
-  text("메일", mailX, tabY);
-
-  let isHoverSite = mouseX > siteX - 80 && mouseX < siteX + 80 && mouseY > tabY - tabH / 2 && mouseY < tabY + tabH / 2;
-  fill(isHoverSite ? 230 : 255);
-  stroke(180);
-  rect(siteX, tabY, 160, tabH, 5, 5, 0, 0);
-  fill(100);
-  text("플레이리스트 선곡", siteX, tabY);
-
-  fill(230);
-  stroke(180);
-  rect(inviteX, tabY, 180, tabH, 5, 5, 0, 0);
-  fill(100);
-  text("초대장 작성", inviteX, tabY);
-
-  let bx = 80;
-  let by = 130;
-  let bw = 40;
-  let bh = 40;
-
-  if (mouseX > bx - bw / 2 && mouseX < bx + bw / 2 && mouseY > by - bh / 2 && mouseY < by + bh / 2) {
-    fill(220);
-  } else {
-    fill(250);
-  }
-  stroke(120);
-  rect(bx, by, bw, bh);
-  fill(100);
-  textAlign(CENTER, CENTER);
-  noStroke();
-  textSize(10);
-  textFont(fontHead4);
-  text("Design", bx, by);
-  stroke(150);
-  line(bx - 20, by - 20, bx, by);
-  line(bx + 20, by - 20, bx, by);
-
-  let cardW = 400;
-  let cardH = 350;
-  let cardX = width / 2;
-  let cardY = height / 2 + 30;
-
-  noStroke();
-  fill(255);
-  rect(cardX, cardY, cardW, cardH, 5);
-
-  fill(30);
-  textSize(24);
-  textAlign(CENTER, CENTER);
-  textFont(fontHead4);
-  text("초대장", cardX, cardY - 140);
   textSize(16);
-  textAlign(LEFT, CENTER);
-  text("To.", cardX - cardW / 2 + 30, cardY - 80);
-  text("장례식 장소:", cardX - cardW / 2 + 30, cardY - 40);
+  text(endingQuestions[currentQuestionIndex], width / 2, 180);
+
+  // 입력창 위치 설정
+  const inputX = width / 2 - 200;
+  const inputY = 220;
+  const inputW = 400;
+  const inputH = 30;
+
+  // 입력창 생성
+  if (!answerInput) {
+    answerInput = createInput('');
+    answerInput.position(inputX, inputY);
+    answerInput.size(inputW, inputH);
+  }
+
+  // 확인 버튼 위치: 입력창 오른쪽 옆
+  let nextBtn = {
+    x: inputX + inputW + 10,
+    y: inputY,
+    w: 80,
+    h: inputH
+  };
+
+  // 버튼 그리기
+  fill(220);
+  stroke(0);
+  rectMode(CORNER);
+  rect(nextBtn.x, nextBtn.y, nextBtn.w, nextBtn.h, 10);
+
+  fill(0);
+  noStroke();
   textAlign(CENTER, CENTER);
-  text("마무리 인사말:", cardX, cardY + 70);
+  text("확인", nextBtn.x + nextBtn.w / 2, nextBtn.y + nextBtn.h / 2);
 
-  if (showPopup) {
-    let popupW = 260;
-    let popupH = 320;
-    let x = width / 2 + 150;
-    let y = height / 2;
+  // 버튼 클릭 감지
+  if (
+    mouseIsPressed &&
+    mouseX > nextBtn.x && mouseX < nextBtn.x + nextBtn.w &&
+    mouseY > nextBtn.y && mouseY < nextBtn.y + nextBtn.h
+  ) {
+    const ans = answerInput.value().trim();
+    if (ans !== "") {
+      endingCredits.push({
+        question: endingQuestions[currentQuestionIndex],
+        answer: ans
+      });
+      answerInput.remove();
+      answerInput = null;
+      currentQuestionIndex++;
 
-    stroke(100);
-    fill(250);
-    rect(x, y, popupW, popupH);
-
-    fill(0);
-    textAlign(LEFT, CENTER);
-    textSize(18);
-    textFont(fontHead4);
-    text("To.", x - popupW / 2 + 20, y - popupH / 2 + 30);
-
-    stroke(180);
-    for (let i = 0; i < 10; i++) {
-      let lineY = y - popupH / 2 + 60 + i * 24;
-      line(x - popupW / 2 + 20, lineY, x + popupW / 2 - 20, lineY);
+      if (currentQuestionIndex >= endingQuestions.length) {
+        currentScreen = 20;
+      }
     }
   }
 }
 
-// Helper functions for screens 5-15
-function drawNextButton() {
-  let btnX = width * 0.9, btnY = height * 0.9, btnWidth = 100, btnHeight = 40;
-  fill(180);
-  stroke(0);
-  rectMode(CENTER);
-  rect(btnX, btnY, btnWidth, btnHeight, 5);
-  fill(0);
-  textSize(15);
-  textAlign(CENTER, CENTER);
-  textFont(fontHead4);
-  text('다음으로', btnX, btnY);
+
+function drawScreen20() {
+  drawNextButton();
+  drawText(endingComments);
 }
 
-function drawText(commentsArray) {
-  imageMode(CENTER);
-  image(deathImage, width / 2, height * 2 / 5, 480, 640);
-  fill(50);
+function drawScreen21() {
+  // 화면 오른쪽 절반 배경을 검정으로
+  fill(0);
+  noStroke();
+  rectMode(CORNER);
+  rect(width * 0.5, 0, width * 0.5, height);
+
+  // 텍스트 설정
+  textAlign(LEFT, TOP);
+  textWrap(WORD);
+  fill(255);
+  let x = width * 0.55;
+  let yStart = 80;
+  let y = yStart - creditScrollY;
+  let contentWidth = width * 0.4;
+
+  // 제목
   textSize(28);
-  textAlign(CENTER, CENTER);
-  textFont(fontHead4);
-  if (textFlowIndex >= 0 && textFlowIndex < commentsArray.length) {
-    text(commentsArray[textFlowIndex], width / 2, height * 4 / 5);
+  textStyle(BOLD);
+  text("내 인생의 엔딩 크레딧", x, y);
+  y += 50;
+
+  // 본문
+  textSize(14);
+  for (let i = 0; i < endingCredits.length; i++) {
+    let entry = endingCredits[i];
+
+    textStyle(BOLD);
+    text(entry.question, x, y, contentWidth);
+    y += 22;
+
+    textStyle(NORMAL);
+    text("- " + entry.answer, x, y, contentWidth);
+    y += 38;
+  }
+
+  // 실제 내용 전체 높이
+  let totalHeight = y - (yStart - creditScrollY);
+
+  // 화면을 초과하는 경우에만 스크롤
+  if (totalHeight > height - yStart) {
+    creditScrollY += scrollSpeed;
   }
 }
 
+
 function drawButtonGrid(buttons, numCols, numRows, onHover = () => {}) {
+  // 버튼 그리드 생성 함수
   let tabX = width * 2 / 3, tabY = height / 10;
   let tabW = width * 1 / 4, tabH = height * 8 / 10;
   noFill();
@@ -947,16 +877,15 @@ function drawButtonGrid(buttons, numCols, numRows, onHover = () => {}) {
 
         let isHovering = mouseX > btnX - btnWidth / 2 && mouseX < btnX + btnWidth / 2 &&
                          mouseY > btnY - btnHeight / 2 && mouseY < btnY + btnHeight / 2;
-        let isSelected = (currentScreen === 9 && buttonIndex === selectedDayIndex) ||
-                         (currentScreen === 11 && buttonIndex === selectedFlowerButtonIndex) ||
-                         (currentScreen === 13 && buttonIndex === selectedFoodIndexButton);
+        let isSelected = (currentScreen === 11 && buttonIndex === selectedDayIndex) ||
+                         (currentScreen === 13 && buttonIndex === selectedFlowerButtonIndex) ||
+                         (currentScreen === 15 && buttonIndex === selectedFoodIndexButton);
 
         fill(isSelected || isHovering ? color(255, 255, 100) : color(200, 200, 240));
         stroke(50);
         rect(btnX, btnY, btnWidth, btnHeight, 10);
         fill(0);
         textSize(20);
-        textFont(fontHead4);
         text(buttons[buttonIndex], btnX, btnY);
 
         if (isHovering) {
@@ -967,91 +896,69 @@ function drawButtonGrid(buttons, numCols, numRows, onHover = () => {}) {
   }
 }
 
-// Mouse interaction
 function mousePressed() {
-  let tabY = 60;
-  let tabH = 30;
-  let inviteX = width * 0.55;
-  let siteX = width * 0.42;
+  // 공통 '다음' 버튼의 위치와 크기 정의
+  let btnX = width * 0.9, btnY = height * 0.9, btnWidth = 100, btnHeight = 40;
 
-  if (mouseX > siteX - 80 && mouseX < siteX + 80 && mouseY > tabY - tabH / 2 && mouseY < tabY + tabH / 2) {
-    currentScreen = 4;
-    return;
-  }
-
-  if (mouseX > inviteX - 90 && mouseX < inviteX + 90 && mouseY > tabY - tabH / 2 && mouseY < tabY + tabH / 2) {
-    currentScreen = 16;
-    return;
-  }
-
+  // 1. 각 화면의 특정 버튼 클릭 처리 (공통 '다음' 버튼보다 먼저 처리)
   if (currentScreen === 1) {
-    let bx = width / 2;
-    let by = height / 2;
-    if (mouseX > bx - 50 && mouseX < bx + 50 && mouseY > by - 35 && mouseY < by + 35) {
+    let startBtnX = width / 2;
+    let startBtnY = height / 2 + 30;
+    let startBtnW = 100;
+    let startBtnH = 40;
+
+    if (
+      mouseX > startBtnX - startBtnW / 2 &&
+      mouseX < startBtnX + startBtnW / 2 &&
+      mouseY > startBtnY - startBtnH / 2 &&
+      mouseY < startBtnY + startBtnH / 2
+    ) {
       currentScreen = 2;
+      return; // 화면 전환 후 즉시 종료
     }
   } else if (currentScreen === 2) {
-    let bx = width / 2;
-    let by = height / 2 + 80;
-    let bw = 250;
-    let bh = 40;
-    if (mouseX > bx - bw / 2 && mouseX < bx + bw / 2 && mouseY > by - bh / 2 && mouseY < by + bh / 2) {
+    let mailBtnX = width / 2;
+    let mailBtnY = height / 2;
+    let mailBtnW = 100;
+    let mailBtnH = 70;
+
+    if (
+      mouseX > mailBtnX - mailBtnW / 2 &&
+      mouseX < mailBtnX + mailBtnW / 2 &&
+      mouseY > mailBtnY - mailBtnH / 2 &&
+      mouseY < mailBtnY + mailBtnH / 2
+    ) {
       currentScreen = 3;
+      return; // 화면 전환 후 즉시 종료
     }
   } else if (currentScreen === 3) {
-    let playlistX = width * 0.2;
-    let playlistY = height * 0.45;
-    let w = 180;
-    let h = 45;
-    if (mouseX > playlistX - w / 2 && mouseX < playlistX + w / 2 && mouseY > playlistY - h / 2 && mouseY < playlistY + h / 2) {
+    let linkBtnX = width / 2;
+    let linkBtnY = height / 2 + 80;
+    let linkBtnW = 250;
+    let linkBtnH = 40;
+
+    if (
+      mouseX > linkBtnX - linkBtnW / 2 &&
+      mouseX < linkBtnX + linkBtnW / 2 &&
+      mouseY > linkBtnY - linkBtnH / 2 &&
+      mouseY < linkBtnY + linkBtnH / 2
+    ) {
       currentScreen = 4;
-    }
-
-    let decorateX = width * 0.25;
-    let decorateY = height * 0.6;
-    if (mouseX > decorateX - w / 2 && mouseX < decorateX + w / 2 && mouseY > decorateY - h / 2 && mouseY < decorateY + h / 2) {
-      currentScreen = 5;
-    }
-
-    let flowerX = width * 0.5;
-    let flowerY = height * 0.52;
-    if (mouseX > flowerX - w / 2 && mouseX < flowerX + w / 2 && mouseY > flowerY - h / 2 && mouseY < flowerY + h / 2) {
-      currentScreen = 10;
-    }
-
-    let foodX = width * 0.75;
-    let foodY = height * 0.45;
-    if (mouseX > foodX - w / 2 && mouseX < foodX + w / 2 && mouseY > foodY - h / 2 && mouseY < foodY + h / 2) {
-      currentScreen = 12;
-    }
-
-    let inviteX = width * 0.7;
-    let inviteY = height * 0.6;
-    if (mouseX > inviteX - w / 2 && mouseX < inviteX + w / 2 && mouseY > inviteY - h / 2 && mouseY < inviteY + h / 2) {
-      currentScreen = 16;
-    }
-  } else if (currentScreen === 4) {
-    for (let i = 0; i < searchResults.length; i++) {
-      let x = 400;
-      let y = 130 + i * 80;
-      if (mouseX > x && mouseX < x + 600 && mouseY > y && mouseY < y + 70) {
-        playlist.push(searchResults[i]);
-      }
+      return; // 화면 전환 후 즉시 종료
     }
   } else if (currentScreen === 5) {
-    let btnX = width * 0.9, btnY = height * 0.9, btnWidth = 100, btnHeight = 40;
-    if (mouseX > btnX - btnWidth / 2 && mouseX < btnX + btnWidth / 2 &&
-        mouseY > btnY - btnHeight / 2 && mouseY < btnY + btnHeight / 2) {
-      if (textFlowIndex < pictureComments.length - 1) textFlowIndex++;
-      else { textFlowIndex = 0; currentScreen = 6; }
+    // 플레이리스트에 검색 결과 추가 로직
+    for (let i = 0; i < searchResults.length; i++) {
+      let y = 150 + i * 40;
+      if (
+        mouseX > width / 2 - 250 && mouseX < width / 2 + 250 &&
+        mouseY > y - 15 && mouseY < y + 15
+      ) {
+        playlist.push(searchResults[i]);
+        console.log(`추가됨: ${searchResults[i].title}`);
+      }
     }
-  } else if (currentScreen === 6) {
-    let btnX = width * 0.9, btnY = height * 0.9, btnWidth = 100, btnHeight = 40;
-    if (mouseX > btnX - btnWidth / 2 && mouseX < btnX + btnWidth / 2 &&
-        mouseY > btnY - btnHeight / 2 && mouseY < btnY + btnHeight / 2) {
-      currentScreen = 7;
-      return;
-    }
+  } else if (currentScreen === 8) {
     if (mouseX > shootButton.x - shootButton.w / 2 && mouseX < shootButton.x + shootButton.w / 2 &&
         mouseY > shootButton.y - shootButton.h / 2 && mouseY < shootButton.y + shootButton.h / 2) {
       if (cam && cam.elt.readyState === 4) {
@@ -1060,32 +967,13 @@ function mousePressed() {
         capturedImage = flippedImage;
         selections.push(capturedImage);
         console.log("Captured flipped photo stored in selections");
-        currentScreen = 7;
+        currentScreen = 9;
       } else {
         console.warn("카메라가 준비되지 않았습니다.");
       }
-      return;
+      return; // 화면 전환 후 즉시 종료
     }
-  } else if (currentScreen === 7) {
-    let btnX = width * 0.9, btnY = height * 0.9, btnWidth = 100, btnHeight = 40;
-    if (mouseX > btnX - btnWidth / 2 && mouseX < btnX + btnWidth / 2 &&
-        mouseY > btnY - btnHeight / 2 && mouseY < btnY + btnHeight / 2) {
-      currentScreen = 8;
-    }
-  } else if (currentScreen === 8) {
-    let btnX = width * 0.9, btnY = height * 0.9, btnWidth = 100, btnHeight = 40;
-    if (mouseX > btnX - btnWidth / 2 && mouseX < btnX + btnWidth / 2 &&
-        mouseY > btnY - btnHeight / 2 && mouseY < btnY + btnHeight / 2) {
-      if (textFlowIndex < decoComments.length - 1) textFlowIndex++;
-      else { textFlowIndex = 0; currentScreen = 9; }
-    }
-  } else if (currentScreen === 9) {
-    let btnX = width * 0.9, btnY = height * 0.9, btnWidth = 100, btnHeight = 40;
-    if (mouseX > btnX - btnWidth / 2 && mouseX < btnX + btnWidth / 2 &&
-        mouseY > btnY - btnHeight / 2 && mouseY < btnY + btnHeight / 2) {
-      currentScreen = 10;
-      return;
-    }
+  } else if (currentScreen === 11) {
     let buttons = dayButton;
     let numCols = 2, numRows = 3;
     let tabX = width * 2 / 3, tabY = height / 10;
@@ -1093,6 +981,7 @@ function mousePressed() {
     let buttonGridW = tabW * 0.9, buttonGridH = tabH * 0.9;
     let colWidth = buttonGridW / numCols;
     let rowHeight = buttonGridH / numRows;
+    let btnWidth = colWidth * 0.8, btnHeight = rowHeight * 0.8;
 
     for (let i = 0; i < numCols; i++) {
       for (let j = 0; j < numRows; j++) {
@@ -1106,67 +995,39 @@ function mousePressed() {
             selectedDayIndex = buttonIndex;
             selections.push(selectedDay);
             console.log(`Selected day: ${selectedDay}`);
-            return;
+            return; // 선택 후 즉시 종료
           }
         }
       }
     }
-  } else if (currentScreen === 10) {
-    let btnX = width * 0.9, btnY = height * 0.9, btnWidth = 100, btnHeight = 40;
-    if (mouseX > btnX - btnWidth / 2 && mouseX < btnX + btnWidth / 2 &&
-        mouseY > btnY - btnHeight / 2 && mouseY < btnY + btnHeight / 2) {
-      if (textFlowIndex < flowerComments.length - 1) textFlowIndex++;
-      else { textFlowIndex = 0; currentScreen = 11; }
-    }
-  } else if (currentScreen === 11) {
-    let btnX = width * 0.9, btnY = height * 0.9, btnWidth = 100, btnHeight = 40;
-    if (mouseX > btnX - btnWidth / 2 && mouseX < btnX + btnWidth / 2 &&
-        mouseY > btnY - btnHeight / 2 && mouseY < btnY + btnHeight / 2) {
-      currentScreen = 12;
-      return;
-    }
-    if (currentMode === '꽃') {
-      let buttons = flowerButton;
-      let numCols = 1, numRows = 3;
-      let tabX = width * 2 / 3, tabY = height / 10;
-      let tabW = width * 1 / 4, tabH = height * 8 / 10;
-      let buttonGridW = tabW * 0.9, buttonGridH = tabH * 0.9;
-      let colWidth = buttonGridW / numCols;
-      let rowHeight = buttonGridH / numRows;
-      let btnWidth = colWidth * 0.8, btnHeight = rowHeight * 0.8;
+  } else if (currentScreen === 13 && currentMode === '꽃') {
+    let buttons = flowerButton;
+    let numCols = 1, numRows = 3;
+    let tabX = width * 2 / 3, tabY = height / 10;
+    let tabW = width * 1 / 4, tabH = height * 8 / 10;
+    let buttonGridW = tabW * 0.9, buttonGridH = tabH * 0.9;
+    let colWidth = buttonGridW / numCols;
+    let rowHeight = buttonGridH / numRows;
+    let btnWidth = colWidth * 0.8, btnHeight = rowHeight * 0.8;
 
-      for (let i = 0; i < numCols; i++) {
-        for (let j = 0; j < numRows; j++) {
-          let buttonIndex = i * numRows + j;
-          if (buttonIndex < buttons.length) {
-            let btnX = tabX + (tabW - buttonGridW) / 2 + colWidth * (i + 0.5);
-            let btnY = tabY + (tabH - buttonGridH) / 2 + rowHeight * (j + 0.5);
-            if (mouseX > btnX - btnWidth / 2 && mouseX < btnX + btnWidth / 2 &&
-                mouseY > btnY - btnHeight / 2 && mouseY < btnY + btnHeight / 2) {
-              selectedFlowerIndex = buttonIndex;
-              selectedFlowerButtonIndex = buttonIndex;
-              selections.push(flowerImages[buttonIndex]);
-              console.log(`Selected flower: ${buttons[buttonIndex]}`);
-              return;
-            }
+    for (let i = 0; i < numCols; i++) {
+      for (let j = 0; j < numRows; j++) {
+        let buttonIndex = i * numRows + j;
+        if (buttonIndex < buttons.length) {
+          let btnX = tabX + (tabW - buttonGridW) / 2 + colWidth * (i + 0.5);
+          let btnY = tabY + (tabH - buttonGridH) / 2 + rowHeight * (j + 0.5);
+          if (mouseX > btnX - btnWidth / 2 && mouseX < btnX + btnWidth / 2 &&
+              mouseY > btnY - btnHeight / 2 && mouseY < btnY + btnHeight / 2) {
+            selectedFlowerIndex = buttonIndex;
+            selectedFlowerButtonIndex = buttonIndex;
+            selections.push(flowerImages[buttonIndex]);
+            console.log(`Selected flower: ${buttons[buttonIndex]}`);
+            return; // 선택 후 즉시 종료
           }
         }
       }
     }
-  } else if (currentScreen === 12) {
-    let btnX = width * 0.9, btnY = height * 0.9, btnWidth = 100, btnHeight = 40;
-    if (mouseX > btnX - btnWidth / 2 && mouseX < btnX + btnWidth / 2 &&
-        mouseY > btnY - btnHeight / 2 && mouseY < btnY + btnHeight / 2) {
-      if (textFlowIndex < foodComments.length - 1) textFlowIndex++;
-      else { textFlowIndex = 0; currentScreen = 13; }
-    }
-  } else if (currentScreen === 13) {
-    let btnX = width * 0.9, btnY = height * 0.9, btnWidth = 100, btnHeight = 40;
-    if (mouseX > btnX - btnWidth / 2 && mouseX < btnX + btnWidth / 2 &&
-        mouseY > btnY - btnHeight / 2 && mouseY < btnY + btnHeight / 2) {
-      currentScreen = 14;
-      return;
-    }
+  } else if (currentScreen === 15) {
     let buttons = foodButton;
     let numCols = 2, numRows = 3;
     let tabX = width * 2 / 3, tabY = height / 10;
@@ -1174,6 +1035,7 @@ function mousePressed() {
     let buttonGridW = tabW * 0.9, buttonGridH = tabH * 0.9;
     let colWidth = buttonGridW / numCols;
     let rowHeight = buttonGridH / numRows;
+    let btnWidth = colWidth * 0.8, btnHeight = rowHeight * 0.8;
 
     for (let i = 0; i < numCols; i++) {
       for (let j = 0; j < numRows; j++) {
@@ -1187,25 +1049,12 @@ function mousePressed() {
             selectedFoodIndexButton = buttonIndex;
             selections.push(foodImages[buttonIndex]);
             console.log(`Selected food: ${buttons[buttonIndex]}`);
-            return;
+            return; // 선택 후 즉시 종료
           }
         }
       }
     }
-  } else if (currentScreen === 14) {
-    let btnX = width * 0.9, btnY = height * 0.9, btnWidth = 100, btnHeight = 40;
-    if (mouseX > btnX - btnWidth / 2 && mouseX < btnX + btnWidth / 2 &&
-        mouseY > btnY - btnHeight / 2 && mouseY < btnY + btnHeight / 2) {
-      if (textFlowIndex < dressComments.length - 1) textFlowIndex++;
-      else { textFlowIndex = 0; currentScreen = 15; }
-    }
-  } else if (currentScreen === 15) {
-    let btnX = width * 0.9, btnY = height * 0.9, btnWidth = 100, btnHeight = 40;
-    if (mouseX > btnX - btnWidth / 2 && mouseX < btnX + btnWidth / 2 &&
-        mouseY > btnY - btnHeight / 2 && mouseY < btnY + btnHeight / 2) {
-      currentScreen = 16;
-      return;
-    }
+  } else if (currentScreen === 17) {
     let hangX = width / 3;
     let hangY = height / 2;
     let hangW = width / 2.5;
@@ -1226,110 +1075,182 @@ function mousePressed() {
         selectedDressIndex = i;
         selections.push(dressImages[i]);
         console.log(`Selected dress: ${i}`);
-        return;
+        return; // 선택 후 즉시 종료
       }
     }
-  } else if (currentScreen === 16) {
-    let bx = 80;
-    let by = 130;
-    let bw = 40;
-    let bh = 40;
-    if (mouseX > bx - bw / 2 && mouseX < bx + bw / 2 && mouseY > by - bh / 2 && mouseY < by + bh / 2) {
-      if (!showPopup) {
-        showPopup = true;
-        let popupW = 260;
-        let popupH = 320;
-        let x = width / 2 + 150;
-        let y = height / 2;
-        inputField = createInput();
-        inputField.position(x - popupW / 2 + 20, y - popupH / 2 + 55);
-        inputField.size(popupW - 40, 24);
-        inputField.style('font-size', '14px');
+  }
+
+  // 2. 공통 '다음' 버튼 클릭 처리 (모든 개별 버튼 처리 이후에 위치)
+  if (mouseX > btnX - btnWidth / 2 && mouseX < btnX + btnWidth / 2 &&
+      mouseY > btnY - btnHeight / 2 && mouseY < btnY + btnHeight / 2) {
+
+    if (currentScreen === 4) {
+      if (textFlowIndex < playlistComments.length - 1) {
+        textFlowIndex++;
+      } else {
+        textFlowIndex = 0;
+        currentScreen = 5;
+      }
+    } else if (currentScreen === 5) {
+      searchInput.hide();
+      searchButton.hide();
+      playButton.hide();
+      currentScreen = 7;
+    } else if (currentScreen === 7) {
+      if (textFlowIndex < pictureComments.length - 1) {
+        textFlowIndex++;
+      } else {
+        textFlowIndex = 0;
+        currentScreen = 8;
+      }
+    } else if (currentScreen === 9) {
+      currentScreen = 10;
+    } else if (currentScreen === 10) {
+      if (textFlowIndex < decoComments.length - 1) {
+        textFlowIndex++;
+      } else {
+        textFlowIndex = 0;
+        currentScreen = 11;
+      }
+    } else if (currentScreen === 11) {
+      currentScreen = 12;
+    } else if (currentScreen === 12) {
+      if (textFlowIndex < flowerComments.length - 1) {
+        textFlowIndex++;
+      } else {
+        textFlowIndex = 0;
+        currentScreen = 13;
+      }
+    } else if (currentScreen === 13) {
+      currentScreen = 14;
+    } else if (currentScreen === 14) {
+      if (textFlowIndex < foodComments.length - 1) {
+        textFlowIndex++;
+      } else {
+        textFlowIndex = 0;
+        currentScreen = 15;
+      }
+    } else if (currentScreen === 15) {
+      currentScreen = 16;
+    } else if (currentScreen === 16) {
+      if (textFlowIndex < dressComments.length - 1) { 
+        textFlowIndex++;
+      } else {
+        textFlowIndex = 0;
+        currentScreen = 17;
+      }
+    } else if (currentScreen === 17) {
+      currentScreen = 18;
+    } else if (currentScreen === 18) {
+      if (textFlowIndex < endingcreditsComments.length - 1) {
+        textFlowIndex++;
+      } else {
+        textFlowIndex = 0; 
+        currentScreen = 19; 
+      }
+    } else if (currentScreen === 19) {
+      currentScreen = 20;
+      answerInput.hide();
+    } else if (currentScreen === 20) {
+      if (textFlowIndex < endingComments.length - 1) {
+        textFlowIndex++;
+      } else {
+        textFlowIndex = 0; 
+        currentScreen = 21;
       }
     }
   }
 }
 
-// YouTube functions
+function keyPressed() {
+  // Screen 13에서 리본 텍스트 입력 후 Enter 키로 저장
+  if (currentScreen === 13 && currentMode === '글') {
+    if (keyCode === ENTER) {
+      // Enter 키를 눌렀을 때만 텍스트를 저장합니다.
+      // draw 함수에서 바로 반영되지 않도록 합니다.
+      if (leftRibbonInput.value().trim() !== '') {
+        leftRibbonText = leftRibbonInput.value();
+        leftRibbonTexts.push(leftRibbonText);
+        leftRibbonInput.value(''); // 입력창 비우기
+      }
+      if (rightRibbonInput.value().trim() !== '') {
+        rightRibbonText = rightRibbonInput.value();
+        rightRibbonTexts.push(rightRibbonText);
+        rightRibbonInput.value(''); // 입력창 비우기
+      }
+    }
+  }
+}
+
+function drawTutorialScreen(textContent) {
+  // 회색 박스
+  fill(240);
+  stroke(180);
+  rectMode(CENTER);
+  rect(width / 2, height - 140, 1100, 200, 30);
+
+  // 텍스트
+  noStroke();
+  fill(80);
+  textSize(16);
+  textAlign(CENTER);
+
+  // 정확한 박스 내부 좌표: 왼쪽 + padding, 위쪽 + padding
+  text(textContent, 700, 600);
+
+  // 다음 버튼
+  tutorialBtn = { x: width - 160, y: height - 100, w: 80, h: 40 };
+
+  fill(
+    mouseX > tutorialBtn.x && mouseX < tutorialBtn.x + tutorialBtn.w &&
+    mouseY > tutorialBtn.y && mouseY < tutorialBtn.y + tutorialBtn.h
+      ? color(180, 230, 180)
+      : color(200, 240, 200)
+  );
+  stroke(150);
+  rectMode(CORNER);
+  rect(tutorialBtn.x, tutorialBtn.y, 80, 40, 10);
+
+  noStroke();
+  fill(0);
+  textAlign(CENTER, CENTER);
+  text("다음", tutorialBtn.x + 40, tutorialBtn.y + 20);
+}
+
+// 유튜브 검색
 function searchYouTube(query) {
-  let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&q=${query}&key=${API_KEY}`;
+  const API_KEY = 'AIzaSyCwni5IDdiBTGJ6PT4y-k57V_MmdUpsHB8';
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=5&q=${encodeURIComponent(query)}&key=${API_KEY}`;
   fetch(url)
     .then(res => res.json())
     .then(data => {
-      searchResults = data.items.map(item => {
-        let song = {
-          title: item.snippet.title,
-          artist: item.snippet.channelTitle,
-          thumbnail: item.snippet.thumbnails.default.url,
-          videoId: item.id.videoId
-        };
-        loadImage(song.thumbnail, img => {
-          song.thumbnailImg = img;
-        });
-        return song;
-      });
+      searchResults = data.items.map(item => ({
+        title: item.snippet.title,
+        videoId: item.id.videoId,
+      }));
     });
 }
 
-function onYouTubeIframeAPIReady() {
-  player = new YT.Player('player', {
-    height: '200',
-    width: '400',
-    videoId: '',
-    events: {
-      'onReady': onPlayerReady,
-      'onStateChange': onPlayerStateChange
-    }
-  });
+// 재생 함수
+function playPlaylist() {
+  if (!playerReady || playlist.length === 0) return;
+  currentPlayingIndex = 0;
+  player.cueVideoById(playlist[0].videoId);
+  setTimeout(() => {
+    player.playVideo();
+  }, 1000);
+  searchInput.hide();
+  searchButton.hide();
+  playButton.hide();
 }
 
-function onPlayerReady(event) {
-  playerReady = true;
-  console.log("YouTube Player 준비 완료");
-}
 
+// 다음 곡으로 넘어가기
 function onPlayerStateChange(event) {
   if (event.data === YT.PlayerState.ENDED) {
     currentPlayingIndex++;
     if (currentPlayingIndex < playlist.length) {
       player.loadVideoById(playlist[currentPlayingIndex].videoId);
-      player.playVideo();
-    }
-  }
-}
-
-function playPlaylist() {
-  console.log("▶️ playerReady:", playerReady);
-  console.log("▶️ playlist.length:", playlist.length);
-
-  if (playerReady && playlist.length > 0) {
-    currentPlayingIndex = 0;
-    player.loadVideoById(playlist[0].videoId);
-    player.playVideo();
-  } else {
-    console.warn("Player가 아직 준비되지 않았거나 플레이리스트가 비어 있습니다.");
-  }
-}
-
-
-function keyPressed() {
-  if (keyCode === ESCAPE && showPopup) {
-    showPopup = false;
-    if (inputField) {
-      inputField.remove();
-      inputField = null;
-    }
-  }
-    if (currentScreen === 13 && currentMode === '글' && keyCode === ENTER) {
-    if (leftRibbonText.trim() !== '') {
-      leftRibbonTexts = [leftRibbonText]; // 마지막 입력값만 유지
-      leftRibbonInput.attribute('disabled', true);
-      console.log(`Saved left ribbon text: ${leftRibbonText}`);
-    }
-    if (rightRibbonText.trim() !== '') {
-      rightRibbonTexts = [rightRibbonText]; // 마지막 입력값만 유지
-      rightRibbonInput.attribute('disabled', true);
-      console.log(`Saved right ribbon text: ${rightRibbonText}`);
     }
   }
 }
