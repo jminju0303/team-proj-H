@@ -297,7 +297,7 @@ function setup() {
   ytDiv.style('width', '1px');
   ytDiv.style('height', '1px');
   ytDiv.style('opacity', '0');
-  
+
   mainColor1 = color(167,141,111);
   mainColor2 = color(216,208,202);
   mainColor3 = color(238,238,238);
@@ -318,10 +318,26 @@ function setup() {
   searchButton = createButton('검색');
   searchButton.position(410, 50);
   searchButton.mousePressed(() => {
+    let query = searchInput.value();
+    if (query) searchYouTube(query);
+  });
+  searchButton.hide();
 
   playButton = createButton('▶ 재생');
-  playButton.mousePressed(playPlaylist);
+  playButton.mousePressed(() => {
+  if (!playerReady || playlist.length === 0) return;
+
+  currentPlayingIndex = 0;
+  player.cueVideoById(playlist[0].videoId);
+
+  setTimeout(() => {
+    player.playVideo();
+  }, 1000);
+
+  searchInput.hide();
+  searchButton.hide();
   playButton.hide();
+});
 
   //캠 설정
   try {
