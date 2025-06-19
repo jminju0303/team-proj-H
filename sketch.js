@@ -262,19 +262,19 @@ function preload() {
 }
 
 function setup() {
-
+  // 1. 저장된 키 있는지 먼저 확인
   api_key = localStorage.getItem("youtube_api_key");
 
-  // 없으면 사용자에게 입력받기
+  // 2. 없으면 prompt 실행
   if (!api_key) {
     api_key = prompt("Enter your API key:");
     if (api_key) {
-      localStorage.setItem("youtube_api_key", api_key); // 저장
+      localStorage.setItem("youtube_api_key", api_key);  // 저장
     } else {
       alert("API key is required.");
+      return; // 키 없으면 setup 중단
     }
   }
-  
   createCanvas(windowWidth, windowHeight);
   textAlign(CENTER, CENTER);
   rectMode(CENTER);
@@ -286,7 +286,7 @@ function setup() {
   ytDiv.style('width', '1px');
   ytDiv.style('height', '1px');
   ytDiv.style('opacity', '0');
-
+  
   mainColor1 = color(167,141,111);
   mainColor2 = color(216,208,202);
   mainColor3 = color(238,238,238);
@@ -1018,6 +1018,8 @@ playButton.style('font-family', fontHead4);
 playButton.style('font-size', '13px');
 playButton.show();
 
+text("유튜브 정책상 광고가 재생될 수 있습니다.", margin + 120, playlistBoxY + playlistBoxH);
+
   // 🆕 RESET 버튼 영역 계산
   let resetBtnX = margin + 240 + 60;  // 텍스트 오른쪽
   let resetBtnY = startY + 70;
@@ -1553,10 +1555,10 @@ function drawScreen13() {
   background(mainColor1);
 
   // 🔴 그림자 설정
-    drawingContext.shadowBlur = 16;
-    drawingContext.shadowColor = 'rgba(0, 0, 0, 0.3)';
-    drawingContext.shadowOffsetX = 0;
-    drawingContext.shadowOffsetY = 0;
+  drawingContext.shadowBlur = 16;
+  drawingContext.shadowColor = 'rgba(0, 0, 0, 0.3)';
+  drawingContext.shadowOffsetX = 0;
+  drawingContext.shadowOffsetY = 0;
 
   drawNextButton();
   textAlign(LEFT, TOP);
@@ -1568,28 +1570,46 @@ function drawScreen13() {
   rightRibbonInput.show();
   textSize(15);
   textFont(mainColor4);
-  text('작성하신 뒤 Enter키를 눌러 문구를 확정해주세요.',width * 2 / 3 + 10, height / 10 + 100)
+  text('작성하신 뒤 Enter키를 눌러 문구를 확정해주세요.', width * 2 / 3 + 10, height / 10 + 100);
 
+  // 🔵 이미지 및 컨테이너 중앙 배치 (작게 + 화면 안에 들어오게)
+  let imgW = 400;
+  let imgH = 520;
+  let padding = 30;
+
+  let imgX = width / 2;             // 더 중앙
+  let imgY = height / 2;            // 정확히 중앙
+
+  // ✅ 컨테이너 먼저
+  fill(mainColor3);
+  noStroke();
+  rectMode(CENTER);
+  rect(imgX, imgY, imgW + padding * 2, imgH + padding * 2, 20);
+
+  // 이미지
   imageMode(CENTER);
-  image(flowerImages[2], width / 3, height / 2, 550, 700);
+  image(flowerImages[2], imgX, imgY, imgW, imgH);
 
-  writeRibbonText();  // 🔥 반드시 호출되어야 함
+  // 리본 텍스트 위치 맞춰주기
+  writeRibbonText(imgX, imgY);
 
+  // 그림자 제거
   drawingContext.shadowBlur = 0;
-    drawingContext.shadowOffsetX = 0;
-    drawingContext.shadowOffsetY = 0;
+  drawingContext.shadowOffsetX = 0;
+  drawingContext.shadowOffsetY = 0;
 }
 
-function writeRibbonText() {
+// 💬 writeRibbonText()에 중심 좌표를 인자로 받도록 수정
+function writeRibbonText(centerX, centerY) {
   textSize(22);
   textFont(fontHead4);
   textAlign(CENTER, CENTER);
 
-  // 왼쪽 리본 (세로쓰기)
+  // 왼쪽 리본
   if (finalLeftRibbonText) {
     push();
-    translate(width / 3 - 35, height / 2 - 180);  // 🔄 X축 더 안쪽으로
-    rotate(PI / 11.8);                             // 🔄 더 세운 각도 (~51도)
+    translate(centerX - 10, centerY - 180);
+    rotate(PI / 11.8);
     fill(0);
     stroke(255);
     strokeWeight(2);
@@ -1602,11 +1622,11 @@ function writeRibbonText() {
     pop();
   }
 
-  // 오른쪽 리본 (세로쓰기)
+  // 오른쪽 리본
   if (finalRightRibbonText) {
     push();
-    translate(width / 3 + 38, height / 2 - 180);  // 🔄 X축 더 안쪽으로
-    rotate(-PI / 11.5);                            // 🔄 더 세운 각도 (~-51도)
+    translate(centerX + 12, centerY - 180);
+    rotate(-PI / 11.5);
     fill(0);
     stroke(255);
     strokeWeight(2);
@@ -2011,6 +2031,41 @@ function drawScreen20() {
 }
 
 function drawScreen21() {
+
+   // ----------------------왼쪽 절반: 선택된 항목 표시--------------------------------------
+  let leftHalfWidth = width * 0.5;
+  let imgX = leftHalfWidth / 2;
+  let imgY = height / 2;
+
+
+imageMode(CENTER);
+image(capturedTable, imgX, imgY-200,400,300);
+let flowerX1 = imgX -290;
+let flowerX2 = imgX +290;
+let flowerY = imgY-210;
+let flowerW = 225/1.2;
+let flowerH = 350/1.2;
+
+
+image(capturedFlower, flowerX1,flowerY ,flowerW,flowerH);
+image(capturedFlower, flowerX2, flowerY,flowerW,flowerH);
+
+for (i=0;i<4;i++){
+  for (j=0;j<2;j++) {
+
+    image(capturedDress, 50 + i*200, imgY +90 +j*150, 100,120);
+    image(guestFace[0], 50 + i*200, imgY +30 +j*150, 70,70);
+    image(guestTable, 50 + i*200, imgY + 100 +j*150, 180,150);
+    image(capturedFood, 50 + i*200, imgY +j*150+70, 50,50);
+    image(capturedBackDress, 50 + 200+20, imgY +100 +j*150, 100,120);
+    image(guestFace[1], 50 + 200+20, imgY +60 +j*150, 70,70);
+    
+  }
+}
+    image(capturedDress, 50 + 600, imgY +90 +2*150, 100,120);
+    image(guestFace[0], 50 + 600, imgY +30 +2*150, 70,70);
+    image(capturedBackDress, 50 + 600 +30, imgY +90 +2*150+20, 100,120);
+    image(guestFace[1], 50 + 600 +30, imgY +30 +2*150+20, 70,70);
   // 오른쪽 절반 배경 검정
   fill(0);
   noStroke();
@@ -2068,33 +2123,6 @@ function drawScreen21() {
   text("정민주", x, y, contentWidth);
 
 
- // ----------------------왼쪽 절반: 선택된 항목 표시--------------------------------------
-  let leftHalfWidth = width * 0.5;
-  let imgX = leftHalfWidth / 2;
-  let imgY = height / 2;
-
-
-imageMode(CENTER);
-image(capturedTable, imgX-80, imgY-200,380,400);
-
-image(capturedFlower, imgX -280, imgY-200,225,350);
-image(capturedFlower, imgX +200, imgY -200,225,350);
-for (i=0;i<4;i++){
-  for (j=0;j<2;j++) {
-
-    image(capturedDress, 50 + i*200, imgY +90 +j*150, 100,120);
-    image(guestFace[0], 50 + i*200, imgY +30 +j*150, 70,70);
-    image(guestTable, 50 + i*200, imgY + 100 +j*150, 180,150);
-    image(capturedFood, 50 + i*200, imgY +j*150+70, 50,50);
-    image(capturedBackDress, 50 + 200+20, imgY +100 +j*150, 100,120);
-    image(guestFace[1], 50 + 200+20, imgY +30 +j*150, 70,70);
-    
-  }
-}
-    image(capturedDress, 50 + 600, imgY +90 +2*150, 100,120);
-    image(guestFace[0], 50 + 600, imgY +30 +2*150, 70,70);
-    image(capturedBackDress, 50 + 600 +30, imgY +90 +2*150+20, 100,120);
-    image(guestFace[1], 50 + 600 +30, imgY +30 +2*150+20, 70,70);
 
     if (!popupVisible) {
       creditScrollY += scrollSpeed;
@@ -2402,7 +2430,7 @@ function mousePressed() {
               selections.push({ screen: 11, type: 'day', value: selectedDay });
             }
             console.log(`Selected day: ${selectedDay}`);
-            capturedTable = get(width/10,height/10,width/2.5,height/1.2);
+            capturedTable = get(20,height/10,width/1.6,height/1.2);
             return;
           }
         }
@@ -2540,7 +2568,7 @@ function mousePressed() {
         currentScreen = 14;
         leftRibbonInput.hide();
         rightRibbonInput.hide();
-      let img = get(width / 3 - 200, height / 2 - 350, 440, 700);
+      let img = get(width / 2, height / 2, 400, 520);
       capturedFlower = img;
       }
     } else if (currentScreen === 14) {
@@ -2700,13 +2728,8 @@ function drawTutorialScreen(textContent) {
 
 // 유튜브 검색
 function searchYouTube(query) {
-  if (!api_key) {
-    alert("API key is missing.");
-    return;
-  }
-
-  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=5&q=${encodeURIComponent(query)}&key=${api_key}`;
-
+  const API_KEY = 'AIzaSyCQGyF7mOP7p2u4IBO34LiQkfbnPIkew9g';
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=5&q=${encodeURIComponent(query)}&key=${API_KEY}`;
   fetch(url)
     .then(res => res.json())
     .then(data => {
@@ -2714,10 +2737,6 @@ function searchYouTube(query) {
         title: item.snippet.title,
         videoId: item.id.videoId,
       }));
-      console.log(searchResults);  // 결과 확인용
-    })
-    .catch(error => {
-      console.error("YouTube API error:", error);
     });
 }
 
