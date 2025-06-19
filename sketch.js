@@ -326,7 +326,6 @@ function setup() {
   playButton = createButton('▶ 재생');
   playButton.mousePressed(playPlaylist);
   playButton.hide();
-});
 
   //캠 설정
   try {
