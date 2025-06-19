@@ -2753,7 +2753,7 @@ function searchYouTube(query) {
     return;
   }
 
-  const url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=5&q=${encodeURIComponent(query)}&key=${api_key}';
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=5&q=${encodeURIComponent(query)}&key=${api_key}`;
 
   fetch(url)
     .then(res => res.json())
