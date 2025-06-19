@@ -74,10 +74,10 @@ let dressComments = [
   '여기 옷장에 걸린 옷들 중에서 자유롭게 골라보세요.'
 ];
 let endingcreditsComments = [
-  '이렇게 모든 설계가 마무리됐습니다.\n음악도 정했고, 영정사진도 찍었고, 공간도 꾸몄고, 먹고 마실 것도 빠짐없이 준비하셨어요.',
+  '이렇게 모든 설계가 마무리됐습니다.\n음악도 정했고, 영정사진도 찍었고, 공간도 꾸몄고, 음식까지도 빠짐없이 준비하셨어요.',
   '장례식에서 정할 게 꽤 많았죠? 그래도 나의 마지막 순간인데, 내가 직접 정할 기회가 없으면 너무 억울하잖아요.\n당신다운, 당신만의 마지막을 잘 꾸미신 것 같네요.',
   '이제는… 정말 떠나야 할 시간입니다.\n하지만 걱정 마세요. 당신이 고른 이 모든 것들은, 누군가의 기억 속에서 천천히 재생될 거예요.\n마지막 순간이 어떻게 기억될지 직접 하나하나 골랐으니 후회도 없을 겁니다.',
-  '이번 삶에서의 모든 순간 동안 너무 수고 많으셨습니다.\n마지막으로 나 삶의 엔딩 크레딧을 한 번 작성해볼게요.\n내 인생이 영화라면, 엔딩 크레딧을 어떻게 올리고 싶으세요?'
+  '이번 삶에서의 모든 순간 동안 너무 수고 많으셨습니다.\n마지막으로 내 삶의 엔딩 크레딧을 한 번 작성해볼게요.\n내 인생이 영화라면, 엔딩 크레딧을 어떻게 올리고 싶으세요?'
 ];
 let endingComments = [
   '멋진 엔딩크레딧이 되겠군요. 수고 많았어요.\n이제 당신이 하나하나 꾸민 장례식장의 모습을 확인할 차례예요.',
@@ -216,13 +216,22 @@ function preload() {
     loadImageWithError('assets/suit_f.png'),
     loadImageWithError('assets/hanbok_f.png')
   ];
-    dressbackImages = [
-    loadImageWithError('assets/school_b.png'),
-    loadImageWithError('assets/magic_b.png'),
-    loadImageWithError('assets/santa_b.png'),
-    loadImageWithError('assets/pajama_b.png'),
-    loadImageWithError('assets/suit_b.png'),
-    loadImageWithError('assets/hanbok_b.png')
+    dressFaceBackImages = [
+    loadImageWithError('assets/school_back.png'),
+    loadImageWithError('assets/magic_back.png'),
+    loadImageWithError('assets/santa_back.png'),
+    loadImageWithError('assets/nightwear_back.png'),
+    loadImageWithError('assets/suit_back.png'),
+    loadImageWithError('assets/hanbok_back.png')
+    ]
+
+    dressFaceFrontImages = [
+    loadImageWithError('assets/school_front.png'),
+    loadImageWithError('assets/magic_front.png'),
+    loadImageWithError('assets/santa_front.png'),
+    loadImageWithError('assets/nightwear_front.png'),
+    loadImageWithError('assets/suit_front.png'),
+    loadImageWithError('assets/hanbok_front.png')
     ]
 
   envelopeImg = loadImageWithError("assets/envelope.png");
@@ -262,6 +271,7 @@ function preload() {
 }
 
 function setup() {
+
   // 1. 저장된 키 있는지 먼저 확인
   api_key = localStorage.getItem("youtube_api_key");
 
@@ -275,6 +285,7 @@ function setup() {
       return; // 키 없으면 setup 중단
     }
   }
+  
   createCanvas(windowWidth, windowHeight);
   textAlign(CENTER, CENTER);
   rectMode(CENTER);
@@ -1018,6 +1029,8 @@ playButton.style('font-family', fontHead4);
 playButton.style('font-size', '13px');
 playButton.show();
 
+fill(mainColor4);
+textFont(fontHead4);
 text("유튜브 정책상 광고가 재생될 수 있습니다.", margin + 120, playlistBoxY + playlistBoxH);
 
   // 🆕 RESET 버튼 영역 계산
@@ -1456,7 +1469,7 @@ function drawScreen11() {
   textSize(30);
   fill(mainColor3);
   textAlign(LEFT, CENTER);
-  text('내 인생에서 기억에 남는\n단 하루만 고른다면?', width / 20, height / 20);
+  text('내 장례식장 테마를 고른다면?', width / 20, height / 20);
   
   // 버튼 hover / 선택 처리
   let hoveredDayIndex = -1;
@@ -1564,7 +1577,7 @@ function drawScreen13() {
   textAlign(LEFT, TOP);
   textSize(30);
   fill(mainColor3);
-  text('남을 사람들에게\n전하고 싶은 말은?', width / 20, height / 20);
+  text('남은 사람들에게\n전하고 싶은 말은?', width / 20, height / 20);
 
   leftRibbonInput.show();
   rightRibbonInput.show();
@@ -1693,7 +1706,7 @@ function drawScreen15() {
     image(foodImages[indexToDraw], previewX, previewY - 30, previewW * 0.6, previewH * 0.7);
     textSize(20);
     fill(0);
-    text(foodButton[indexToDraw],previewX-100, previewY+200);
+    text(foodButton[indexToDraw],previewX-40, previewY+100);
   }
 
   // --- 오른쪽 패널 ---
@@ -1954,7 +1967,7 @@ function drawScreen19() {
 
   // ---------- 클릭 처리 ----------
   if (
-    mouseIsPressed && isHovering
+    (mouseIsPressed && isHovering)
   ) {
     const ans = answerInput.value().trim();
     if (ans !== "") {
@@ -2037,7 +2050,7 @@ function drawScreen21() {
   let imgX = leftHalfWidth / 2;
   let imgY = height / 2;
 
-
+background(238,238,238);
 imageMode(CENTER);
 image(capturedTable, imgX, imgY-200,400,300);
 let flowerX1 = imgX -290;
@@ -2053,19 +2066,25 @@ image(capturedFlower, flowerX2, flowerY,flowerW,flowerH);
 for (i=0;i<4;i++){
   for (j=0;j<2;j++) {
 
-    image(capturedDress, 50 + i*200, imgY +90 +j*150, 100,120);
-    image(guestFace[0], 50 + i*200, imgY +30 +j*150, 70,70);
+    image(FrontImage, 50 + i*200 , imgY +30 +j*150, 90,105);
     image(guestTable, 50 + i*200, imgY + 100 +j*150, 180,150);
     image(capturedFood, 50 + i*200, imgY +j*150+70, 50,50);
-    image(capturedBackDress, 50 + 200+20, imgY +100 +j*150, 100,120);
-    image(guestFace[1], 50 + 200+20, imgY +60 +j*150, 70,70);
+    image(BackImage, 50 + i*200+20, imgY +100 +j*150,100,120);
     
   }
 }
-    image(capturedDress, 50 + 600, imgY +90 +2*150, 100,120);
-    image(guestFace[0], 50 + 600, imgY +30 +2*150, 70,70);
-    image(capturedBackDress, 50 + 600 +30, imgY +90 +2*150+20, 100,120);
-    image(guestFace[1], 50 + 600 +30, imgY +30 +2*150+20, 70,70);
+
+    image(FrontImage, 50 + 600, imgY +2*150, 90,105);
+    image(BackImage, 50 + 600 +20, imgY +2*150+80, 100,120);
+    image(BackImage, 50 + 600 +80, imgY +200+80, 100,120);
+    image(BackImage, 50 + 400 -20, imgY +2*150+80, 100,120);
+    image(BackImage, 50 + 200-40, imgY +100 -20,100,120);
+    image(BackImage, 50 + 2*200-40, imgY +100 +1*150,100,120);
+    image(BackImage, 50 + 1*200-40, imgY +100 +1*150,110,130);
+
+    image(BackImage, imgX-10, imgY,80,96);
+    image(BackImage, imgX+10, imgY,80,96);
+
   // 오른쪽 절반 배경 검정
   fill(0);
   noStroke();
@@ -2495,8 +2514,8 @@ function mousePressed() {
       if (mouseX > imgCenterX - displayWidth / 3&& mouseX < imgCenterX + displayWidth / 3 &&
           mouseY > imgCenterY - displayHeight /1.2&& mouseY < imgCenterY + displayHeight / 2) {
         selectedDressIndex = i;
-        capturedDress = dressImages[selectedDressIndex];
-        capturedBackDress = dressbackImages[selectedDressIndex];
+        BackImage = dressFaceBackImages[selectedDressIndex];
+        FrontImage = dressFaceFrontImages[selectedDressIndex];
         console.log(`Selected dress: ${i}`);
         return; // 선택 후 즉시 종료
       }
@@ -2568,7 +2587,8 @@ function mousePressed() {
         currentScreen = 14;
         leftRibbonInput.hide();
         rightRibbonInput.hide();
-      let img = get(width / 2, height / 2, 400, 520);
+        let img = get(width / 2 - 400 / 2, height / 2 - 520 / 2, 400, 520);
+      
       capturedFlower = img;
       }
     } else if (currentScreen === 14) {
@@ -2728,8 +2748,13 @@ function drawTutorialScreen(textContent) {
 
 // 유튜브 검색
 function searchYouTube(query) {
-  const API_KEY = 'AIzaSyCQGyF7mOP7p2u4IBO34LiQkfbnPIkew9g';
-  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=5&q=${encodeURIComponent(query)}&key=${API_KEY}`;
+  if (!api_key) {
+    alert("API key is missing.");
+    return;
+  }
+
+  const url = https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=5&q=${encodeURIComponent(query)}&key=${api_key};
+
   fetch(url)
     .then(res => res.json())
     .then(data => {
@@ -2737,6 +2762,10 @@ function searchYouTube(query) {
         title: item.snippet.title,
         videoId: item.id.videoId,
       }));
+      console.log(searchResults);  // 결과 확인용
+    })
+    .catch(error => {
+      console.error("YouTube API error:", error);
     });
 }
 
