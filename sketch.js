@@ -263,8 +263,17 @@ function preload() {
 
 function setup() {
 
-  api_key = prompt("Enter your API key");
-  console.log(api_key);
+  api_key = localStorage.getItem("youtube_api_key");
+
+  // 없으면 사용자에게 입력받기
+  if (!api_key) {
+    api_key = prompt("Enter your API key:");
+    if (api_key) {
+      localStorage.setItem("youtube_api_key", api_key); // 저장
+    } else {
+      alert("API key is required.");
+    }
+  }
   
   createCanvas(windowWidth, windowHeight);
   textAlign(CENTER, CENTER);
