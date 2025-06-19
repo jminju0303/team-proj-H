@@ -164,50 +164,6 @@ let creditScrollY = 0;
 let scrollSpeed = 0.7;
 
 let api_key;
-let started = false;
-
-window.onload = function () {
-  document.getElementById("startBtn").addEventListener("click", () => {
-    api_key = prompt("Enter your API key:");
-    if (api_key) {
-      started = true;
-      document.getElementById("startBtn").style.display = "none";
-      loop(); // p5 draw 재개
-    }
-  });
-};
-
-function setup() {
-  
-  createCanvas(windowWidth, windowHeight);
-  textAlign(CENTER, CENTER);
-  rectMode(CENTER);
-  noStroke();
-
-  let ytDiv = createDiv();
-  ytDiv.id('invisible-player');
-  ytDiv.style('width', '1px');
-  ytDiv.style('height', '1px');
-  ytDiv.style('opacity', '0');
-
-  // 검색창 및 버튼
-  searchInput = createInput();
-  searchInput.position(100, 50);
-  searchInput.size(300);
-  searchInput.hide();
-  searchButton = createButton('검색');
-  searchButton.position(410, 50);
-  searchButton.mousePressed(() => {
-    let query = searchInput.value();
-    if (query) searchYouTube(query);
-  });
-  searchButton.hide();
-
-  playButton = createButton('▶️ 재생');
-  playButton.mousePressed(playPlaylist);
-  playButton.hide();
-  noLoop();
-}
 
 function preload() {
 
@@ -306,12 +262,21 @@ function preload() {
 }
 
 function setup() {
+
+  api_key = prompt("Enter your API key");
+  console.log(api_key);
   
   createCanvas(windowWidth, windowHeight);
   textAlign(CENTER, CENTER);
   rectMode(CENTER);
   imageMode(CORNER);
   noStroke();
+
+  let ytDiv = createDiv();
+  ytDiv.id('invisible-player');
+  ytDiv.style('width', '1px');
+  ytDiv.style('height', '1px');
+  ytDiv.style('opacity', '0');
 
   mainColor1 = color(167,141,111);
   mainColor2 = color(216,208,202);
@@ -364,8 +329,6 @@ function setup() {
   rightRibbonInput.size(width * 0.2, 30);
   rightRibbonInput.input(() => rightRibbonText = rightRibbonInput.value());
   rightRibbonInput.hide();
-
-  noLoop();
 }
 
 function draw() {
