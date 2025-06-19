@@ -324,18 +324,7 @@ function setup() {
   searchButton.hide();
 
   playButton = createButton('▶ 재생');
-playButton.mousePressed(() => {
-  if (!playerReady || playlist.length === 0) return;
-
-  currentPlayingIndex = 0;
-  player.cueVideoById(playlist[0].videoId);
-
-  setTimeout(() => {
-    player.playVideo();
-  }, 1000);
-
-  searchInput.hide();
-  searchButton.hide();
+  playButton.mousePressed(playPlaylist);
   playButton.hide();
 });
 
