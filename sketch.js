@@ -166,6 +166,9 @@ let scrollSpeed = 0.7;
 let api_key;
 
 function setup() {
+  api_key = prompt("Enter your API key");
+  console.log(api_key);
+  
   createCanvas(windowWidth, windowHeight);
   textAlign(CENTER, CENTER);
   rectMode(CENTER);
@@ -193,9 +196,6 @@ function setup() {
   playButton = createButton('▶️ 재생');
   playButton.mousePressed(playPlaylist);
   playButton.hide();
-
-  api_key = prompt("Enter your API key");
-  console.log(api_key);
 }
 
 function preload() {
@@ -295,6 +295,10 @@ function preload() {
 }
 
 function setup() {
+
+  api_key = prompt("Enter your API key");
+  console.log(api_key);
+  
   createCanvas(windowWidth, windowHeight);
   textAlign(CENTER, CENTER);
   rectMode(CENTER);
