@@ -318,10 +318,6 @@ function setup() {
   searchButton = createButton('검색');
   searchButton.position(410, 50);
   searchButton.mousePressed(() => {
-    let query = searchInput.value();
-    if (query) searchYouTube(query);
-  });
-  searchButton.hide();
 
   playButton = createButton('▶ 재생');
   playButton.mousePressed(playPlaylist);
