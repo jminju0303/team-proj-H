@@ -164,10 +164,20 @@ let creditScrollY = 0;
 let scrollSpeed = 0.7;
 
 let api_key;
+let started = false;
+
+window.onload = function () {
+  document.getElementById("startBtn").addEventListener("click", () => {
+    api_key = prompt("Enter your API key:");
+    if (api_key) {
+      started = true;
+      document.getElementById("startBtn").style.display = "none";
+      loop(); // p5 draw 재개
+    }
+  });
+};
 
 function setup() {
-  api_key = prompt("Enter your API key");
-  console.log(api_key);
   
   createCanvas(windowWidth, windowHeight);
   textAlign(CENTER, CENTER);
@@ -196,6 +206,7 @@ function setup() {
   playButton = createButton('▶️ 재생');
   playButton.mousePressed(playPlaylist);
   playButton.hide();
+  noLoop();
 }
 
 function preload() {
@@ -295,9 +306,6 @@ function preload() {
 }
 
 function setup() {
-
-  api_key = prompt("Enter your API key");
-  console.log(api_key);
   
   createCanvas(windowWidth, windowHeight);
   textAlign(CENTER, CENTER);
@@ -356,6 +364,8 @@ function setup() {
   rightRibbonInput.size(width * 0.2, 30);
   rightRibbonInput.input(() => rightRibbonText = rightRibbonInput.value());
   rightRibbonInput.hide();
+
+  noLoop();
 }
 
 function draw() {
