@@ -9,17 +9,15 @@
     <!-- YouTube IFrame API (must load before p5.js) -->
     <script src="https://www.youtube.com/iframe_api"></script>
     
-    <!-- CDN p5.js -->
+    <!-- Use either local or CDN p5.js (but not both) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    <!-- Or replace above line with: <script src="libraries/p5.min.js"></script> if you prefer local -->
     <script src="libraries/p5.sound.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="style.css">
   </head>
 
   <body>
-    <!-- Start 버튼 -->
-    <button id="startBtn">Start Program</button>
-
     <!-- Invisible container for YouTube player -->
     <div id="invisible-player" style="width: 1px; height: 1px; opacity: 0;"></div>
 
